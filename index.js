@@ -86,7 +86,7 @@ bot_VK.event("message_new", async (ctx) => {
 bot_VK.event("group_join", async (ctx) => {
 	const id_vk = ctx.message.user_id;
 	const user = await User.find({ id_vk });
-
+	console.log(user);
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = await rp(`https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`).then(res => JSON.parse(res).response[0]);
 		const new_user = new User({id_vk, name, surname});
