@@ -85,6 +85,7 @@ bot_VK.event("message_new", async (ctx) => {
 
 bot_VK.event("group_join", async (ctx) => {
 	const id_vk = ctx.message.user_id;
+	console.log(ctx.message);
 	const user = await User.find({ id_vk });
 	console.log(user);
 	if (!user[0]) {
