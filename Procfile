@@ -1,1 +1,1 @@
-web: npm run audio_bot
+web: node index.js
