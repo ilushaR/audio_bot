@@ -9,7 +9,7 @@ const VkBot = require("node-vk-bot-api");
 
 const TelegramBot = require("node-telegram-bot-api");
 const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
-
+console.log(process.env.TOKEN_TELEGRAM);
 
 const app = express();
 
