@@ -91,7 +91,7 @@ bot_VK.event("group_join", async (ctx) => {
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = await rp(`https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`).then(res => JSON.parse(res).response[0]);
 		const new_user = new User({id_vk, name, surname});
-		new_user.save().catch(console.log);
+		await new_user.save();
 	}
 	if (!user[0] || !user.id_telegram) {
 		const hash = await md5(id_vk + process.env.SALT).substr(0, 10);
@@ -99,7 +99,6 @@ bot_VK.event("group_join", async (ctx) => {
 		ctx.reply(`tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`);
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
-
 });
 
 bot_VK.event("group_leave", async ctx => {
