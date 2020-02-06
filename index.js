@@ -25,7 +25,7 @@ const songSchema = mongoose.Schema({
 });
 
 const userSchema = mongoose.Schema({
-	_id: {type: mongoose.Schema.Types.ObjectId, default: mongoose.Types.ObjectId() },
+	// _id: {type: mongoose.Schema.Types.ObjectId, default: mongoose.Types.ObjectId() },
 	id_vk: Number,
 	id_telegram: { type: Number, default: null },
 	name: String,
