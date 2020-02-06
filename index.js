@@ -122,4 +122,4 @@ app.use(bodyParser.json());
 
 app.post("/", bot_VK.webhookCallback);
 
-app.listen(1234, () => console.log("Listen on port 1234"));
+app.listen(process.env.PORT || 5000, () => console.log("Server is working"));
