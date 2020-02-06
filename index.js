@@ -93,7 +93,7 @@ bot_VK.event("group_join", async (ctx) => {
 		console.log("work1");
 		try {
 			console.log(typeof id_vk, typeof name, typeof surname);
-			const new_user = new User({id_vk, name, surname});
+			const new_user = new User({id_vk, id_telegram: null, name, surname});
 			console.log(new_user);
 			console.log("work2");
 			await new_user.save();
