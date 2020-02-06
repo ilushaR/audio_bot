@@ -45,7 +45,7 @@ const bot_VK = new VkBot({
 bot_VK.event("message_new", async (ctx) => {
 	const id_vk = ctx.message.from_id;
 	const user = await User.find({ id_vk });
-	const permission = user[0] ? false : user[0].permission;
+	const permission = user[0] ? user[0].permission : false; 
 	if (!permission) {
 		return ctx.reply("Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки");
 	}
