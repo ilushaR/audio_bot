@@ -1,0 +1,29 @@
+{
+  "name": "audio_bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "vk": "nodemon index.js"
+  },
+  "author": "Ilya Rogulin",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "md5": "^2.2.1",
+    "mongoose": "^5.8.7",
+    "node-telegram-bot-api": "^0.40.0",
+    "node-vk-bot-api": "^3.1.1",
+    "request-promise": "^4.2.5"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-import": "^2.20.0",
+    "eslint-plugin-node": "^11.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "nodemon": "^2.0.2"
+  }
+}
