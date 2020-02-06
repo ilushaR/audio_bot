@@ -92,7 +92,9 @@ bot_VK.event("group_join", async (ctx) => {
 		const { first_name: name, last_name: surname } = await rp(`https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`).then(res => JSON.parse(res).response[0]);
 		console.log("work1");
 		try {
+			console.log(id_vk, name, surname);
 			const new_user = new User({id_vk, name, surname});
+			console.log(new_user);
 			console.log("work2");
 			await new_user.save();
 		} catch (e) {
