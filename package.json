@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "vk": "nodemon index.js"
+    "audio_bot": "nodemon index.js"
   },
   "author": "Ilya Rogulin",
   "license": "MIT",
