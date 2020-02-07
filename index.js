@@ -38,7 +38,8 @@ const Song = mongoose.model("Song", songSchema);
 
 const bot_VK = new VkBot({
 	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK
+	confirmation: process.env.CONFIRMATION_VK,
+	execute_timeout: 0
 });
 
 bot_VK.event("message_new", async (ctx) => {
