@@ -7,6 +7,7 @@ const rp = require("request-promise");
 const bodyParser = require("body-parser");
 const VkBot = require("node-vk-bot-api");
 const TelegramBot = require("node-telegram-bot-api");
+const { finished } = require("stream");
 
 const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
 const bot_VK = new VkBot({
@@ -82,8 +83,8 @@ bot_VK.event("message_new", async (ctx) => {
 		return;
 	}
 	ctx.reply("Зайди к боту в телеграм");
-	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
 	bot_telegram.sendMessage(id_telegram, "Держи");
+	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
 	// async function asyncForEach(array, callback) {
 	// 	for (let index = 0; index < array.length; index++) {
 	// 		await callback(array[index], index, array);
@@ -97,12 +98,13 @@ bot_VK.event("message_new", async (ctx) => {
 	// 		await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	// 	});
 	// });
-	songs.forEach(({url, artist, title}, index) => {
+	songs.forEach(async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
-		stream.on("finish", async () => {
-			await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-		});
+		// finished("finish", async () => {
+		// 	await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+		// });
+		await finished(stream).then(() => bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title }));
 	});
 
 });
