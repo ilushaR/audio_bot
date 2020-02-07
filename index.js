@@ -43,7 +43,7 @@ const Song = mongoose.model("Song", songSchema);
 
 bot_VK.event("message_new", async (ctx) => {
 	const id_vk = ctx.message.from_id;
-	console.log(ctx);
+	console.log(ctx.fwd_messages);
 	const user = await User.find({ id_vk });
 	const permission = user[0] ? user[0].permission : false; 
 	if (!permission) {
