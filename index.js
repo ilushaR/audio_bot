@@ -7,7 +7,8 @@ const rp = require("request-promise");
 const bodyParser = require("body-parser");
 const VkBot = require("node-vk-bot-api");
 const TelegramBot = require("node-telegram-bot-api");
-const { finished } = require("stream");
+const stream = require("stream");
+const util = require("util");
 
 const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
 const bot_VK = new VkBot({
@@ -98,6 +99,7 @@ bot_VK.event("message_new", async (ctx) => {
 	// 		await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	// 	});
 	// });
+	const finished = util.promisify(stream.finished);
 	songs.forEach(async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
