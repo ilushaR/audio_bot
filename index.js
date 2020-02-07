@@ -86,21 +86,14 @@ bot_VK.event("message_new", async (ctx) => {
 	ctx.reply("Зайди к боту в телеграм");
 	bot_telegram.sendMessage(id_telegram, "Держи");
 	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
-	// async function asyncForEach(array, callback) {
-	// 	for (let index = 0; index < array.length; index++) {
-	// 		await callback(array[index], index, array);
-	// 	}
-	// }
+	async function asyncForEach(array, callback) {
+		for (let index = 0; index < array.length; index++) {
+			await callback(array[index], index, array);
+		}
+	}
 
-	// asyncForEach(songs, async ({url, artist, title}, index) => {
-	// 	const file = fs.createWriteStream(`audio${index}.mp3`);
-	// 	const stream = await rp(url).pipe(file);
-	// 	stream.on("finish", async() => {
-	// 		await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-	// 	});
-	// });
 	const finished = util.promisify(stream.finished);
-	songs.forEach(async ({url, artist, title}, index) => {
+	asyncForEach(songs, async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
 		// finished("finish", async () => {
@@ -109,6 +102,15 @@ bot_VK.event("message_new", async (ctx) => {
 		await finished(stream);
 		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	});
+	// songs.forEach(async ({url, artist, title}, index) => {
+	// 	const file = fs.createWriteStream(`audio${index}.mp3`);
+	// 	const stream = rp(url).pipe(file);
+	// 	// finished("finish", async () => {
+	// 	// 	await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+	// 	// });
+	// 	await finished(stream);
+	// 	bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+	// });
 
 });
 
