@@ -41,6 +41,26 @@ const userSchema = mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Song = mongoose.model("Song", songSchema);
 
+function searchForAudios(obj, audio) {
+	if (obj.reply_message) {
+		const filtered = obj.reply_message.attachments.filter(attachment => attachment.type === "audio");
+		audio.push(...filtered);
+		searchForAudios(obj.reply_message, audio);
+	}
+	if (obj.fwd_messages) {
+		for (let fwd_msg of obj.fwd_messages) {
+			const filtered = fwd_msg.attachments.filter(attachment => attachment.type === "audio");
+			audio.push(...filtered);
+			searchForAudios(fwd_msg, audio);
+		}
+	}
+}
+
+async function asyncForEach(array, callback) {
+	for (let index = 0; index < array.length; index++) {
+		await callback(array[index], index, array);
+	}
+}
 
 bot_VK.event("message_new", async (ctx) => {
 	const id_vk = ctx.message.from_id;
@@ -48,20 +68,6 @@ bot_VK.event("message_new", async (ctx) => {
 	const permission = user[0] ? user[0].permission : false; 
 	if (!permission) {
 		return ctx.reply("Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки");
-	}
-	function searchForAudios(obj, audio) {
-		if (obj.reply_message) {
-			const filtered = obj.reply_message.attachments.filter(attachment => attachment.type === "audio");
-			audio.push(...filtered);
-			searchForAudios(obj.reply_message, audio);
-		}
-		if (obj.fwd_messages) {
-			for (let fwd_msg of obj.fwd_messages) {
-				const filtered = fwd_msg.attachments.filter(attachment => attachment.type === "audio");
-				audio.push(...filtered);
-				searchForAudios(fwd_msg, audio);
-			}
-		}
 	}
 	let audios = ctx.message.attachments.filter(attachment => attachment.type === "audio");
 	searchForAudios(ctx.message, audios);
@@ -86,32 +92,13 @@ bot_VK.event("message_new", async (ctx) => {
 	ctx.reply("Зайди к боту в телеграм");
 	bot_telegram.sendMessage(id_telegram, "Держи");
 	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
-	async function asyncForEach(array, callback) {
-		for (let index = 0; index < array.length; index++) {
-			await callback(array[index], index, array);
-		}
-	}
-
 	const finished = util.promisify(stream.finished);
 	asyncForEach(songs, async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
-		// finished("finish", async () => {
-		// 	await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-		// });
 		await finished(stream);
 		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	});
-	// songs.forEach(async ({url, artist, title}, index) => {
-	// 	const file = fs.createWriteStream(`audio${index}.mp3`);
-	// 	const stream = rp(url).pipe(file);
-	// 	// finished("finish", async () => {
-	// 	// 	await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-	// 	// });
-	// 	await finished(stream);
-	// 	bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-	// });
-
 });
 
 
