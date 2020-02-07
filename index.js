@@ -22,16 +22,15 @@ const songSchema = mongoose.Schema({
 	url: String,
 	artist: String,
 	title: String
-});
+}, { _id: false });
 
 const userSchema = mongoose.Schema({
-	// _id: {type: mongoose.Schema.Types.ObjectId, default: mongoose.Types.ObjectId() },
 	id_vk: Number,
-	id_telegram: { type: Number, default: null },
+	id_telegram: Number,
 	name: String,
 	surname: String,
-	permission: { type: Boolean, default: true },
-	songs: { type: [songSchema], default: [null, null, null]}
+	permission: Boolean,
+	songs: [songSchema]
 });
 
 const User = mongoose.model("User", userSchema);
@@ -85,26 +84,16 @@ bot_VK.event("message_new", async (ctx) => {
 
 bot_VK.event("group_join", async (ctx) => {
 	const id_vk = ctx.message.user_id;
-	console.log(ctx.message);
 	const user = await User.find({ id_vk });
-	console.log(user);
 	if (!user[0]) {
-		const { first_name: name, last_name: surname } = await rp(`https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`).then(res => JSON.parse(res).response[0]);
-		console.log("work1");
-		try {
-			console.log(typeof id_vk, typeof name, typeof surname);
-			const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
-			console.log(new_user);
-			console.log("work2");
-			await new_user.save();
-		} catch (e) {
-			console.log(e);
-		}
-	}
-	if (!user[0] || !user.id_telegram) {
-		const hash = await md5(id_vk + process.env.SALT).substr(0, 10);
+		const query = `https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`;
+		const { first_name: name, last_name: surname } = await rp(query).then(res => JSON.parse(res).response[0]);
+		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
+		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
 		ctx.reply(`tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`);
+		console.log(new_user);
+		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
 });
