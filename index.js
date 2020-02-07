@@ -65,7 +65,7 @@ bot_VK.event("message_new", async (ctx) => {
 		ctx.reply("Ты не авторизовался в телеграме. Перейди к боту");
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		try {
-			ctx.reply({message: `tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`, dont_parse_links: 1 });
+			ctx.reply({message: `tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		} catch (e) {
 			console.log(e);
 		}
