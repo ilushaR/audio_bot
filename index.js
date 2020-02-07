@@ -6,11 +6,14 @@ const mongoose = require("mongoose");
 const rp = require("request-promise");
 const bodyParser = require("body-parser");
 const VkBot = require("node-vk-bot-api");
-
 const TelegramBot = require("node-telegram-bot-api");
-const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
-console.log(process.env.TOKEN_TELEGRAM);
 
+const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
+const bot_VK = new VkBot({
+	token: process.env.TOKEN_VK,
+	confirmation: process.env.CONFIRMATION_VK,
+	execute_timeout: 0
+});
 const app = express();
 
 mongoose.connect(process.env.DATABASE_URL, { useUnifiedTopology: true , useNewUrlParser: true },  err => {
@@ -36,11 +39,7 @@ const userSchema = mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Song = mongoose.model("Song", songSchema);
 
-const bot_VK = new VkBot({
-	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
-	execute_timeout: 0
-});
+
 
 bot_VK.event("message_new", async (ctx) => {
 	const id_vk = ctx.message.from_id;
@@ -64,15 +63,11 @@ bot_VK.event("message_new", async (ctx) => {
 	if (!id_telegram) {
 		ctx.reply("Ты не авторизовался в телеграме. Перейди к боту");
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
-		try {
-			ctx.reply({message: `tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
-		} catch (e) {
-			console.log(e);
-		}
+		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		return;
 	}
 
-	ctx.reply("tlgg.ru/WannaMovieBot");
+	ctx.reply("t-do.ru/WannaMovieBot");
 
 	songs.forEach(async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
@@ -86,7 +81,6 @@ bot_VK.event("message_new", async (ctx) => {
 });
 
 
-
 bot_VK.event("group_join", async (ctx) => {
 	const id_vk = ctx.message.user_id;
 	const user = await User.find({ id_vk });
@@ -96,7 +90,7 @@ bot_VK.event("group_join", async (ctx) => {
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
-		ctx.reply(`tlgg.ru/WannaMovieBot?start=${id_vk}-${hash}`);
+		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		console.log(new_user);
 		await new_user.save();
 	}
