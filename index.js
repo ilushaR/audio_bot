@@ -104,7 +104,8 @@ bot_VK.event("message_new", async (ctx) => {
 		// finished("finish", async () => {
 		// 	await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 		// });
-		await finished(stream).then(() => bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title }));
+		await finished(stream);
+		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	});
 
 });
