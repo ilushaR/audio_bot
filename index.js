@@ -40,20 +40,31 @@ const User = mongoose.model("User", userSchema);
 const Song = mongoose.model("Song", songSchema);
 
 
-
 bot_VK.event("message_new", async (ctx) => {
 	const id_vk = ctx.message.from_id;
-	console.log(ctx.fwd_messages);
 	const user = await User.find({ id_vk });
 	const permission = user[0] ? user[0].permission : false; 
 	if (!permission) {
 		return ctx.reply("Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки");
 	}
-	if (!ctx.message.attachments[0] || ctx.message.attachments.every(attachment => attachment.type !== "audio")) {
+	function searchForAudios(obj, audio) {
+		if (!obj.fwd_messages) {
+			return;
+		}
+		for (let fwd_msg of obj.fwd_messages) {
+			const filtered = fwd_msg.attachments.filter(attachment => attachment.type === "audio");
+			audio.push(...filtered);
+			searchForAudios(fwd_msg, audio);
+		}
+	}
+	let audios = ctx.message.attachments.filter(attachment => attachment.type === "audio");
+	searchForAudios(ctx.message, audios);
+	
+	if (!audios[0]) {
 		return ctx.reply("Я не получил трек. Выбери музыку и отправь ее мне");
 	}
 	let tracks = [];
-	ctx.message.attachments.filter(attachment => attachment.type === "audio").map(({ audio }) => {
+	audios.forEach(({ audio }) => {
 		const { url, artist, title } = audio;
 		const song = new Song({ url, artist, title });
 		tracks.push(song);
