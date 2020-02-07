@@ -78,9 +78,9 @@ bot_VK.event("message_new", async (ctx) => {
 		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		return;
 	}
-
+	ctx.reply("Зайди к боту в телеграм");
 	ctx.reply("t-do.ru/WannaMovieBot");
-
+	bot_telegram.sendMessage(id_telegram, "Держи");
 	songs.forEach(async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
