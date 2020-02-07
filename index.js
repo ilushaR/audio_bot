@@ -48,6 +48,11 @@ bot_VK.event("message_new", async (ctx) => {
 		return ctx.reply("Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки");
 	}
 	function searchForAudios(obj, audio) {
+		if (obj.reply_message) {
+			const filtered = obj.reply_message.attachments.filter(attachment => attachment.type === "audio");
+			audio.push(...filtered);
+			searchForAudios(obj.reply_message, audio);
+		}
 		if (obj.fwd_messages) {
 			for (let fwd_msg of obj.fwd_messages) {
 				const filtered = fwd_msg.attachments.filter(attachment => attachment.type === "audio");
@@ -58,7 +63,6 @@ bot_VK.event("message_new", async (ctx) => {
 	}
 	let audios = ctx.message.attachments.filter(attachment => attachment.type === "audio");
 	searchForAudios(ctx.message, audios);
-	
 	if (!audios[0]) {
 		return ctx.reply("Я не получил трек. Выбери музыку и отправь ее мне");
 	}
@@ -80,12 +84,24 @@ bot_VK.event("message_new", async (ctx) => {
 	ctx.reply("Зайди к боту в телеграм");
 	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
 	bot_telegram.sendMessage(id_telegram, "Держи");
-	songs.forEach(async ({url, artist, title}, index) => {
+	// async function asyncForEach(array, callback) {
+	// 	for (let index = 0; index < array.length; index++) {
+	// 		await callback(array[index], index, array);
+	// 	}
+	// }
+
+	// asyncForEach(songs, async ({url, artist, title}, index) => {
+	// 	const file = fs.createWriteStream(`audio${index}.mp3`);
+	// 	const stream = await rp(url).pipe(file);
+	// 	stream.on("finish", async() => {
+	// 		await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+	// 	});
+	// });
+	songs.forEach(({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
-		stream.on("finish", () => {
-
-			bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+		stream.on("finish", async () => {
+			await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 		});
 	});
 
