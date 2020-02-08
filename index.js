@@ -85,20 +85,20 @@ bot_VK.event("message_new", async (ctx) => {
 	await User.updateOne({ id_vk, permission: true }, { $set: { songs: tracks }});
 	const { id_telegram, songs } = await User.findOne({ id_vk }, {id_telegram: 1, songs: 1});
 	if (!id_telegram) {
-		await ctx.reply("Ты не авторизовался в телеграме. Перейди к боту");
+		ctx.reply("Ты не авторизовался в телеграме. Перейди к боту");
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
-		await ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
+		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		return;
 	}
-	await ctx.reply("Зайди к боту в телеграм");
+	ctx.reply("Зайди к боту в телеграм");
 	bot_telegram.sendMessage(id_telegram, "Держи");
-	await ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
+	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
 	const finished = util.promisify(stream.finished);
 	asyncForEach(songs, async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
 		await finished(stream);
-		await bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
 	});
 });
 
@@ -113,8 +113,8 @@ bot_VK.event("group_join", async (ctx) => {
 		}).then(res => res.response[0]);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
-		await ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
-		await ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
 		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
@@ -130,12 +130,19 @@ bot_telegram.onText(/\/start/, async msg => {
 	const id_telegram = msg.chat.id;
 	const message = msg.text.slice(7).split("-");
 	const [id_vk, hash] = message;
-	if (md5(id_vk + process.env.SALT).substr(0, 10) === hash) {
-		await User.updateOne({ id_vk }, { $set: { id_telegram }});
-		bot_telegram.sendMessage(id_telegram, "Ты добавлен, теперь может отправлять аудио боту в ВК");
-	} else {
-		bot_telegram.sendMessage(id_telegram, "Нет доступа, либо уже авторизовался");
+	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
+		return bot_telegram.sendMessage(id_telegram, "Нет доступа, либо уже авторизовался");
 	}
+	await User.updateOne({ id_vk }, { $set: { id_telegram }});
+	bot_telegram.sendMessage(id_telegram, "Ты добавлен, теперь можешь получать музыку");
+	const { songs } = await User.findOne({ id_vk }, {songs: 1});
+	const finished = util.promisify(stream.finished);
+	asyncForEach(songs, async ({url, artist, title}, index) => {
+		const file = fs.createWriteStream(`audio${index}.mp3`);
+		const stream = rp(url).pipe(file);
+		await finished(stream);
+		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+	});
 });
 
 app.use(bodyParser.json());
