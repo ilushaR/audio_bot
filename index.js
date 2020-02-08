@@ -115,6 +115,7 @@ bot_VK.event("group_join", async (ctx) => {
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
 		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
+		console.log(ctx);
 		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
