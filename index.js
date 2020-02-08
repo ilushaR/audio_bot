@@ -136,6 +136,7 @@ bot_telegram.onText(/\/start/, async msg => {
 		return bot_telegram.sendMessage(id_telegram, "Нет доступа");
 	}
 	const user = await User.find({ id_telegram });
+	console.log(user[0]);
 	if (user[0]) {
 		return bot_telegram.sendMessage(id_telegram, "Ты уже добавлен");
 	}
