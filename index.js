@@ -15,7 +15,6 @@ const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true}
 const bot_VK = new VkBot({
 	token: process.env.TOKEN_VK,
 	confirmation: process.env.CONFIRMATION_VK,
-	execute_timeout: 1000
 });
 const app = express();
 
@@ -114,8 +113,12 @@ bot_VK.event("group_join", async (ctx) => {
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
+		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
 		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
-		console.log(ctx);
 		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
