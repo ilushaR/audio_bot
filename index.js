@@ -112,6 +112,7 @@ bot_VK.event("group_join", async (ctx) => {
 		}).then(res => res.response[0]);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
+		console.log(hash);
 		ctx.reply({message: `Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи\n\nt-do.ru/ilushaR_bot?start=${id_vk}-${hash}`, 
 			random_id: Date.now(), dont_parse_links: 1 });
 		await new_user.save();
@@ -129,6 +130,7 @@ bot_telegram.onText(/\/start/, async msg => {
 	const id_telegram = msg.chat.id;
 	const message = msg.text.slice(7).split("-");
 	const [id_vk, hash] = message;
+	console.log(hash);
 	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
 		return bot_telegram.sendMessage(id_telegram, "Нет доступа");
 	}
