@@ -9,6 +9,7 @@ const VkBot = require("node-vk-bot-api");
 const TelegramBot = require("node-telegram-bot-api");
 const stream = require("stream");
 const util = require("util");
+const api = require("node-vk-bot-api/lib/api");
 
 const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true});
 const bot_VK = new VkBot({
@@ -106,13 +107,15 @@ bot_VK.event("group_join", async (ctx) => {
 	const id_vk = ctx.message.user_id;
 	const user = await User.find({ id_vk });
 	if (!user[0]) {
-		const query = `https://api.vk.com/method/users.get?user_ids=${id_vk}&access_token=${process.env.TOKEN_VK}&v=5.101`;
-		const { first_name: name, last_name: surname } = await rp(query).then(res => JSON.parse(res).response[0]);
+		const { first_name: name, last_name: surname } = await api("users.get", { 
+			user_ids: id_vk, 
+			access_token: process.env.TOKEN_VK
+		}).then(res => JSON.parse(res).response[0]);
+		console.log(name, surname);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
 		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
-		console.log(new_user);
 		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
