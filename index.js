@@ -130,7 +130,11 @@ bot_telegram.onText(/\/start/, async msg => {
 	const message = msg.text.slice(7).split("-");
 	const [id_vk, hash] = message;
 	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
-		return bot_telegram.sendMessage(id_telegram, "Нет доступа, либо уже авторизовался");
+		return bot_telegram.sendMessage(id_telegram, "Нет доступа");
+	}
+	const user = await User.find({ id_telegram });
+	if (user[0]) {
+		return bot_telegram.sendMessage(id_telegram, "Ты уже добавлен");
 	}
 	await User.updateOne({ id_vk }, { $set: { id_telegram }});
 	bot_telegram.sendMessage(id_telegram, "Ты добавлен, теперь можешь получать музыку");
