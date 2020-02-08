@@ -15,7 +15,7 @@ const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {polling: true}
 const bot_VK = new VkBot({
 	token: process.env.TOKEN_VK,
 	confirmation: process.env.CONFIRMATION_VK,
-	execute_timeout: 10
+	execute_timeout: 1000
 });
 const app = express();
 
