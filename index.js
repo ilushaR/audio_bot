@@ -84,14 +84,14 @@ bot_VK.event("message_new", async (ctx) => {
 	await User.updateOne({ id_vk, permission: true }, { $set: { songs: tracks }});
 	const { id_telegram, songs } = await User.findOne({ id_vk }, {id_telegram: 1, songs: 1});
 	if (!id_telegram) {
-		ctx.reply("Ты не авторизовался в телеграме. Перейди к боту");
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
-		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
+		ctx.reply({message: `Ты не авторизовался в телеграме. Перейди к боту\n\nt-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, 
+			random_id: Date.now(), dont_parse_links: 1 });
 		return;
 	}
-	ctx.reply("Зайди к боту в телеграм");
 	bot_telegram.sendMessage(id_telegram, "Держи");
-	ctx.reply({message: "t-do.ru/WannaMovieBot", random_id: Date.now(), dont_parse_links: 1 });
+	ctx.reply({message: "Зайди к боту в телеграм\n\nt-do.ru/WannaMovieBot", 
+		random_id: Date.now(), dont_parse_links: 1 });
 	const finished = util.promisify(stream.finished);
 	asyncForEach(songs, async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
@@ -112,8 +112,8 @@ bot_VK.event("group_join", async (ctx) => {
 		}).then(res => res.response[0]);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
-		ctx.reply("Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи");
-		ctx.reply({message: `t-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, random_id: Date.now(), dont_parse_links: 1 });
+		ctx.reply({message: `Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи\n\nt-do.ru/WannaMovieBot?start=${id_vk}-${hash}`, 
+			random_id: Date.now(), dont_parse_links: 1 });
 		await new_user.save();
 	}
 	await User.updateOne({ id_vk }, { $set: { permission: true }});
