@@ -112,6 +112,7 @@ bot_VK.event("group_join", async (ctx) => {
 		}).then(res => res.response[0]);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
+		console.log("qwe");
 		console.log(hash);
 		ctx.reply({message: `Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи\n\nt-do.ru/ilushaR_bot?start=${id_vk}-${hash}`, 
 			random_id: Date.now(), dont_parse_links: 1 });
