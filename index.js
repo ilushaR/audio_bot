@@ -110,7 +110,7 @@ bot_VK.event("group_join", async (ctx) => {
 		const { first_name: name, last_name: surname } = await api("users.get", { 
 			user_ids: id_vk, 
 			access_token: process.env.TOKEN_VK
-		}).then(res => JSON.parse(res).response[0]);
+		}).then(res => console.log(res));
 		console.log(name, surname);
 		const new_user = new User({id_vk, id_telegram: null, name, surname, permission: true, songs: [null, null, null]});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
