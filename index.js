@@ -139,14 +139,15 @@ bot_telegram.onText(/\/start/, async msg => {
 	await User.updateOne({ id_vk }, { $set: { id_telegram }});
 	bot_telegram.sendMessage(id_telegram, "Ты добавлен, теперь можешь получать музыку");
 	const { songs } = await User.findOne({ id_vk }, {songs: 1});
-	console.log(songs);
-	const finished = util.promisify(stream.finished);
-	asyncForEach(songs, async ({url, artist, title}, index) => {
-		const file = fs.createWriteStream(`audio${index}.mp3`);
-		const stream = rp(url).pipe(file);
-		await finished(stream);
-		bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
-	});
+	if (songs[0]) {
+		const finished = util.promisify(stream.finished);
+		asyncForEach(songs, async ({url, artist, title}, index) => {
+			const file = fs.createWriteStream(`audio${index}.mp3`);
+			const stream = rp(url).pipe(file);
+			await finished(stream);
+			bot_telegram.sendAudio(id_telegram, file.path, { performer: artist, title });
+		});
+	}
 });
 
 app.use(bodyParser.json());
