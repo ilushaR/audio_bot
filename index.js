@@ -47,6 +47,7 @@ function searchForAudios(obj, audio) {
 		audio.push(...filtered);
 		searchForAudios(obj.reply_message, audio);
 	}
+
 	if (obj.fwd_messages) {
 		for (let fwd_msg of obj.fwd_messages) {
 			const filtered = fwd_msg.attachments.filter(attachment => attachment.type === "audio");
@@ -66,14 +67,18 @@ bot_VK.event("message_new", async ctx => {
 	const id_vk = ctx.message.from_id;
 	const user = await User.find({ id_vk });
 	const permission = user[0] ? user[0].permission : false; 
+
 	if (!permission) {
 		return ctx.reply("Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки");
 	}
+
 	let audios = ctx.message.attachments.filter(attachment => attachment.type === "audio");
 	searchForAudios(ctx.message, audios);
+
 	if (!audios[0]) {
 		return ctx.reply("Я не получил трек. Выбери музыку и отправь ее мне");
 	}
+
 	let tracks = [];
 	audios.forEach(({ audio }) => {
 		const { url, artist, title } = audio;
@@ -83,16 +88,19 @@ bot_VK.event("message_new", async ctx => {
 	
 	await User.updateOne({ id_vk, permission: true }, { $set: { songs: tracks }});
 	const { id_telegram, songs } = await User.findOne({ id_vk }, {id_telegram: 1, songs: 1});
+
 	if (!id_telegram) {
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 		ctx.reply({message: `Ты не авторизовался в телеграме. Перейди к боту\n\nt-do.ru/ilushaR_bot?start=${id_vk}-${hash}`, 
 			random_id: Date.now(), dont_parse_links: 1 });
 		return;
 	}
+
 	bot_telegram.sendMessage(id_telegram, "Держи");
 	ctx.reply({message: "Зайди к боту в телеграм\n\nt-do.ru/ilushaR_bot", 
 		random_id: Date.now(), dont_parse_links: 1 });
 	const finished = util.promisify(stream.finished);
+
 	asyncForEach(songs, async ({url, artist, title}, index) => {
 		const file = fs.createWriteStream(`audio${index}.mp3`);
 		const stream = rp(url).pipe(file);
@@ -105,6 +113,7 @@ bot_VK.event("message_new", async ctx => {
 bot_VK.event("group_join", async ctx => {
 	const id_vk = ctx.message.user_id;
 	const user = await User.find({ id_vk });
+
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = await api("users.get", { 
 			user_ids: id_vk, 
@@ -129,18 +138,23 @@ bot_telegram.onText(/\/start/, async msg => {
 	const id_telegram = msg.chat.id;
 	const message = msg.text.slice(7).split("-");
 	const [id_vk, hash] = message;
-	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
-		return bot_telegram.sendMessage(id_telegram, "Нет доступа");
-	}
 	const user = await User.find({ id_telegram });
+
 	if (user[0]) {
 		return bot_telegram.sendMessage(id_telegram, "Ты уже добавлен");
 	}
+
+	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
+		return bot_telegram.sendMessage(id_telegram, "Нет доступа");
+	}
+
 	await User.updateOne({ id_vk }, { $set: { id_telegram }});
 	bot_telegram.sendMessage(id_telegram, "Ты добавлен, теперь можешь получать музыку");
 	const { songs } = await User.findOne({ id_vk }, {songs: 1});
+
 	if (songs[0]) {
 		const finished = util.promisify(stream.finished);
+
 		asyncForEach(songs, async ({url, artist, title}, index) => {
 			const file = fs.createWriteStream(`audio${index}.mp3`);
 			const stream = rp(url).pipe(file);
