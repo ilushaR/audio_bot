@@ -128,16 +128,16 @@ bot_VK.event("message_new", async (ctx) => {
 		null,
 		Markup.keyboard([
 			[
-				Markup.button({
-					action: {
-						type: "open_link",
-						link: "https://t-do.ru/ilushaR_bot",
-						label: "Telegram Web",
-						payload: JSON.stringify({
-							url: "https://t-do.ru/ilushaR_bot",
-						}),
-					},
-				}),
+				// Markup.button({
+				// 	action: {
+				// 		type: "open_link",
+				// 		link: "https://t-do.ru/ilushaR_bot",
+				// 		label: "Telegram Web",
+				// 		payload: JSON.stringify({
+				// 			url: "https://t-do.ru/ilushaR_bot",
+				// 		}),
+				// 	},
+				// }),
 				Markup.button({
 					action: {
 						type: "open_link",
