@@ -138,16 +138,16 @@ bot_VK.event("message_new", async (ctx) => {
 						}),
 					},
 				}),
-				Markup.button({
-					action: {
-						type: "open_link",
-						link: "tg://resolve?domain=ilushaR_bot",
-						label: "Telegram App",
-						payload: JSON.stringify({
-							url: "tg://resolve?domain=ilushaR_bot",
-						}),
-					},
-				}),
+				// Markup.button({
+				// 	action: {
+				// 		type: "open_link",
+				// 		link: "tg://resolve?domain=ilushaR_bot",
+				// 		label: "Telegram App",
+				// 		payload: JSON.stringify({
+				// 			url: "tg://resolve?domain=ilushaR_bot",
+				// 		}),
+				// 	},
+				// }),
 			],
 		]).oneTime()
 	);
