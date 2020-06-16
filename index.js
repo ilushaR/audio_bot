@@ -89,7 +89,7 @@ bot_VK.event("message_new", async (ctx) => {
 	}
 
 	let audios = ctx.message.attachments.filter(
-		(attachment) => attachment.type === "audio"
+		attachment => attachment.type === "audio"
 	);
 	searchForAudios(ctx.message, audios);
 
@@ -124,12 +124,7 @@ bot_VK.event("message_new", async (ctx) => {
 	}
 
 	bot_telegram.sendMessage(id_telegram, "Держи");
-	ctx.reply(
-		{
-			message: "Зайди к боту в телеграм\n\nt-do.ru/ilushaR_bot",
-			random_id: Date.now(),
-			dont_parse_links: 1,
-		},
+	ctx.reply("Зайди к боту в телеграм",
 		null,
 		Markup.keyboard([
 			[
