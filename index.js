@@ -98,7 +98,21 @@ bot_VK.event("message_new", async ctx => {
 
 	bot_telegram.sendMessage(id_telegram, "Держи");
 	ctx.reply({message: "Зайди к боту в телеграм\n\nt-do.ru/ilushaR_bot", 
-		random_id: Date.now(), dont_parse_links: 1 });
+		random_id: Date.now(), dont_parse_links: 1 }, null, Markup
+		.keyboard([
+		   [
+			 Markup.button({
+				 action : {
+					 type: 'open_link',
+					 link: 't-do.ru/ilushaR_bot',
+					 label: 'Telegram',
+					 payload: JSON.stringify({
+						 url: 't-do.ru/ilushaR_bot',
+					 }),
+				 }
+			 }),
+		   ],
+		 ]).oneTime()));
 	const finished = util.promisify(stream.finished);
 
 	asyncForEach(songs, async ({url, artist, title}, index) => {
