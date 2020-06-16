@@ -124,27 +124,17 @@ bot_VK.event("message_new", async (ctx) => {
 	}
 
 	bot_telegram.sendMessage(id_telegram, "Держи");
-	ctx.reply("Зайди к боту в телеграм",
+	ctx.reply("Зайди к боту в телеграм\n\ntg://resolve?domain=ilushaR_bot",
 		null,
 		Markup.keyboard([
 			[
-				// Markup.button({
-				// 	action: {
-				// 		type: "open_link",
-				// 		link: "https://t-do.ru/ilushaR_bot",
-				// 		label: "Telegram Web",
-				// 		payload: JSON.stringify({
-				// 			url: "https://t-do.ru/ilushaR_bot",
-				// 		}),
-				// 	},
-				// }),
 				Markup.button({
 					action: {
 						type: "open_link",
-						link: "tg://resolve?domain=ilushaR_bot",
-						label: "Telegram App",
+						link: "https://t-do.ru/ilushaR_bot",
+						label: "Telegram Web",
 						payload: JSON.stringify({
-							url: "tg://resolve?domain=ilushaR_bot",
+							url: "https://t-do.ru/ilushaR_bot",
 						}),
 					},
 				}),
