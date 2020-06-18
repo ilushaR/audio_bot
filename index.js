@@ -187,21 +187,6 @@ bot_VK.event('group_join', async (ctx) => {
 		});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 
-		const {response: message_id } = await api('messages.send', {
-			peer_id: id_vk,
-			random_id: id_vk,
-			message: 'tg://resolve?domain=ilushaR_bot',
-			access_token: process.env.TOKEN_VK,
-		});
-
-		console.log(message_id);
-
-		await api('messages.pin', {
-			peer_id: id_vk,
-			message_id: message_id,
-			access_token: process.env.TOKEN_VK,
-		}).catch(console.log);
-
 		ctx.reply('Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи',
 			null,
 			Markup.keyboard([
