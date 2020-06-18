@@ -189,7 +189,7 @@ bot_VK.event('group_join', async (ctx) => {
 
 
 		ctx.reply('tg://resolve?domain=ilushaR_bot');
-		await api('message.pin', {
+		await api('messages.pin', {
 			peer_id: id_vk,
 			message_id: 1,
 			access_token: process.env.TOKEN_VK,
