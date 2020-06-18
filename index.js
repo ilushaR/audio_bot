@@ -191,7 +191,7 @@ bot_VK.event('group_join', async (ctx) => {
 			peer_id: id_vk,
 			message: 'tg://resolve?domain=ilushaR_bot',
 			access_token: process.env.TOKEN_VK,
-		});
+		}).catch(console.log);
 
 		console.log(message_id);
 
