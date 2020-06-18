@@ -187,7 +187,7 @@ bot_VK.event('group_join', async (ctx) => {
 		});
 		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
 
-		const { message_id } = await api('messages.send', {
+		const message_id = await api('messages.send', {
 			peer_id: id_vk,
 			random_id: id_vk,
 			message: 'tg://resolve?domain=ilushaR_bot',
