@@ -8,8 +8,8 @@ const { searchForAudios } = require('../utils');
 
 
 const bot_VK = new VkBot({
-	token: process.env.TOKEN_VK_TEST,
-	confirmation: process.env.CONFIRMATION_VK_TEST,
+	token: process.env.TOKEN_VK,
+	confirmation: process.env.CONFIRMATION_VK,
 });
 
 bot_VK.event('message_new', async ctx => {
@@ -101,7 +101,7 @@ bot_VK.event('group_join', async (ctx) => {
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = await api('users.get', {
 			user_ids: id_vk,
-			access_token: process.env.TOKEN_VK_TEST,
+			access_token: process.env.TOKEN_VK,
 		}).then(res => res.response[0]);
 
 		const new_user = new User({

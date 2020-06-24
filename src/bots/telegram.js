@@ -22,7 +22,7 @@ function sendAudios(songs, id_telegram) {
 	});
 }
 
-const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM_TEST, {
+const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {
 	polling: true,
 });
 
