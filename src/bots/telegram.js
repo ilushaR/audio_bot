@@ -1,11 +1,28 @@
 const TelegramBot = require('node-telegram-bot-api');
 const { User } = require('../database/schema');
 const md5 = require('md5');
-const { sendAudios } = require('../utils');
+const fs = require('fs');
+const stream = require('stream');
+const util = require('util');
+const rp = require('request-promise');
+const { asyncForEach } = require('../utils');
 
+function sendAudios(songs, id_telegram) {
+	const finished = util.promisify(stream.finished);
 
+	asyncForEach(songs, async ({ url, artist, title }, index) => {
+		const file = fs.createWriteStream(`audio${index}.mp3`);
+		const stream = rp(url).pipe(file);
+		await finished(stream);
+        
+		bot_telegram.sendAudio(id_telegram, file.path, {
+			performer: artist,
+			title,
+		});
+	});
+}
 
-const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {
+const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM_TEST, {
 	polling: true,
 });
 
@@ -35,4 +52,7 @@ bot_telegram.onText(/\/start/, async (msg) => {
 	}
 });
 
-module.exports = bot_telegram;
+module.exports =  {
+	bot_telegram,
+	sendAudios
+};

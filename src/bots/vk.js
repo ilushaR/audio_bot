@@ -3,13 +3,13 @@ const Markup = require('node-vk-bot-api/lib/markup');
 const api = require('node-vk-bot-api/lib/api');
 const { User, Song } = require('../database/schema');
 const md5 = require('md5');
-const bot_telegram = require('./telegram');
-const { searchForAudios, sendAudios } = require('../utils');
+const { bot_telegram, sendAudios } = require('./telegram');
+const { searchForAudios } = require('../utils');
 
 
 const bot_VK = new VkBot({
-	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
+	token: process.env.TOKEN_VK_TEST,
+	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
 bot_VK.event('message_new', async ctx => {
@@ -101,7 +101,7 @@ bot_VK.event('group_join', async (ctx) => {
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = await api('users.get', {
 			user_ids: id_vk,
-			access_token: process.env.TOKEN_VK,
+			access_token: process.env.TOKEN_VK_TEST,
 		}).then(res => res.response[0]);
 
 		const new_user = new User({

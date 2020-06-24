@@ -4,15 +4,11 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bot_VK = require('./bots/vk');
 // eslint-disable-next-line no-unused-vars
-const bot_telegram = require('./bots/telegram');
+const { bot_telegram } = require('./bots/telegram');
 // eslint-disable-next-line no-unused-vars
 const mongoose = require('./database/index');
 
-
 const app = express();
-
-
-
 
 app.use(bodyParser.json());
 

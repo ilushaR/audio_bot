@@ -8,3 +8,5 @@ mongoose.connect(
 		console.log('Successfully connected');
 	}
 );
+
+module.exports = mongoose;
