@@ -1,83 +1,18 @@
-require('dotenv').config();
-const fs = require('fs');
-const md5 = require('md5');
-const express = require('express');
-const mongoose = require('mongoose');
-const rp = require('request-promise');
-const bodyParser = require('body-parser');
 const VkBot = require('node-vk-bot-api');
 const Markup = require('node-vk-bot-api/lib/markup');
-const TelegramBot = require('node-telegram-bot-api');
-const stream = require('stream');
-const util = require('util');
 const api = require('node-vk-bot-api/lib/api');
+const { User, Song } = require('../database/schema');
+const md5 = require('md5');
+const bot_telegram = require('./telegram');
+const { searchForAudios, sendAudios } = require('../utils');
 
-const bot_telegram = new TelegramBot(process.env.TOKEN_TELEGRAM, {
-	polling: true,
-});
+
 const bot_VK = new VkBot({
 	token: process.env.TOKEN_VK,
 	confirmation: process.env.CONFIRMATION_VK,
 });
-const app = express();
 
-mongoose.connect(
-	process.env.DATABASE_URL,
-	{ useUnifiedTopology: true, useNewUrlParser: true },
-	err => {
-		if (err) throw err;
-		console.log('Successfully connected');
-	}
-);
-
-const songSchema = mongoose.Schema(
-	{
-		url: String,
-		artist: String,
-		title: String,
-	},
-	{ _id: false }
-);
-
-const userSchema = mongoose.Schema({
-	id_vk: Number,
-	id_telegram: Number,
-	name: String,
-	surname: String,
-	permission: Boolean,
-	songs: [songSchema],
-});
-
-const User = mongoose.model('User', userSchema);
-const Song = mongoose.model('Song', songSchema);
-
-function searchForAudios(obj, audio) {
-	if (obj.reply_message) {
-		const filtered = obj.reply_message.attachments.filter(
-			(attachment) => attachment.type === 'audio'
-		);
-		audio.push(...filtered);
-		searchForAudios(obj.reply_message, audio);
-	}
-
-	if (obj.fwd_messages) {
-		for (let fwd_msg of obj.fwd_messages) {
-			const filtered = fwd_msg.attachments.filter(
-				attachment => attachment.type === 'audio'
-			);
-			audio.push(...filtered);
-			searchForAudios(fwd_msg, audio);
-		}
-	}
-}
-
-async function asyncForEach(array, callback) {
-	for (let index = 0; index < array.length; index++) {
-		await callback(array[index], index, array);
-	}
-}
-
-bot_VK.event('message_new', async (ctx) => {
+bot_VK.event('message_new', async ctx => {
 	const id_vk = ctx.message.from_id;
 	const user = await User.find({ id_vk });
 	const permission = user[0] ? user[0].permission : false;
@@ -91,6 +26,7 @@ bot_VK.event('message_new', async (ctx) => {
 	let audios = ctx.message.attachments.filter(
 		(attachment) => attachment.type === 'audio'
 	);
+
 	searchForAudios(ctx.message, audios);
 
 	if (!audios[0]) {
@@ -154,17 +90,8 @@ bot_VK.event('message_new', async (ctx) => {
 			],
 		]).oneTime()
 	);
-	const finished = util.promisify(stream.finished);
 
-	asyncForEach(songs, async ({ url, artist, title }, index) => {
-		const file = fs.createWriteStream(`audio${index}.mp3`);
-		const stream = rp(url).pipe(file);
-		await finished(stream);
-		bot_telegram.sendAudio(id_telegram, file.path, {
-			performer: artist,
-			title,
-		});
-	});
+	sendAudios(songs, id_telegram);
 });
 
 bot_VK.event('group_join', async (ctx) => {
@@ -214,44 +141,4 @@ bot_VK.event('group_leave', async (ctx) => {
 	await User.updateOne({ id_vk }, { $set: { permission: false } });
 });
 
-bot_telegram.onText(/\/start/, async (msg) => {
-	const id_telegram = msg.chat.id;
-	const message = msg.text.slice(7).split('-');
-	const [id_vk, hash] = message;
-	const user = await User.find({ id_telegram });
-
-	if (user[0]) {
-		return bot_telegram.sendMessage(id_telegram, 'Ты уже добавлен');
-	}
-
-	if (md5(id_vk + process.env.SALT).substr(0, 10) !== hash) {
-		return bot_telegram.sendMessage(id_telegram, 'Нет доступа');
-	}
-
-	await User.updateOne({ id_vk }, { $set: { id_telegram } });
-	bot_telegram.sendMessage(
-		id_telegram,
-		'Ты добавлен, теперь можешь получать музыку'
-	);
-	const { songs } = await User.findOne({ id_vk }, { songs: 1 });
-
-	if (songs[0]) {
-		const finished = util.promisify(stream.finished);
-
-		asyncForEach(songs, async ({ url, artist, title }, index) => {
-			const file = fs.createWriteStream(`audio${index}.mp3`);
-			const stream = rp(url).pipe(file);
-			await finished(stream);
-			bot_telegram.sendAudio(id_telegram, file.path, {
-				performer: artist,
-				title,
-			});
-		});
-	}
-});
-
-app.use(bodyParser.json());
-
-app.post('/', bot_VK.webhookCallback);
-
-app.listen(process.env.PORT || 5000, () => console.log('Server is working'));
+module.exports = bot_VK;
