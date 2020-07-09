@@ -8,7 +8,7 @@ import { searchForAudios } from '../utils';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK_TEST,
+	token: process.env.TOKEN_VK,
 	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
@@ -101,7 +101,7 @@ vkBot.event('group_join', async (ctx) => {
 	if (!user[0]) {
 		const { first_name: name, last_name: surname } = (await api('users.get', {
 			user_ids: vkId,
-			access_token: process.env.TOKEN_VK_TEST,
+			access_token: process.env.TOKEN_VK,
 		})).response[0];
 
 		const newUser = new User({
