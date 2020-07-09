@@ -52,7 +52,7 @@ telegramBot.onText(/\/start/, async (msg) => {
 	}
 });
 
-export default {
+export {
 	telegramBot,
 	sendAudios
 };

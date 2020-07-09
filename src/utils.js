@@ -24,7 +24,7 @@ async function asyncForEach(array, callback) {
 	}
 }
 
-export default {
+export {
 	searchForAudios,
 	asyncForEach
 };
