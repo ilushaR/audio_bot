@@ -1,4 +1,4 @@
-const mongoose = require('./index');
+import mongoose from './index';
 
 const songSchema = mongoose.Schema(
 	{
@@ -10,8 +10,8 @@ const songSchema = mongoose.Schema(
 );
 
 const userSchema = mongoose.Schema({
-	id_vk: Number,
-	id_telegram: Number,
+	vkId: Number,
+	telegramId: Number,
 	name: String,
 	surname: String,
 	permission: Boolean,
@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Song= mongoose.model('Song', songSchema);
 
-module.exports = {
+export default {
 	User,
 	Song
 };

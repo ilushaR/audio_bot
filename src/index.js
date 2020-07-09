@@ -1,17 +1,14 @@
-require('dotenv').config();
-
-const express = require('express');
-const bodyParser = require('body-parser');
-const bot_VK = require('./bots/vk');
-// eslint-disable-next-line no-unused-vars
-const { bot_telegram } = require('./bots/telegram');
-// eslint-disable-next-line no-unused-vars
-const mongoose = require('./database/index');
+import 'dotenv/config';
+import express from 'express';
+import { json } from 'body-parser';
+import vkBot from './bots/vk';
+import './bots/telegram';
+import './database/index';
 
 const app = express();
 
-app.use(bodyParser.json());
+app.use(json());
 
-app.post('/', bot_VK.webhookCallback);
+app.post('/', vkBot.webhookCallback);
 
 app.listen(process.env.PORT || 5000, () => console.log('Server is working'));
