@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Song = mongoose.model('Song', songSchema);
 
-export default {
+export {
 	User,
 	Song
 };
