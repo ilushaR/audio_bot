@@ -1,20 +1,20 @@
-const VkBot = require('node-vk-bot-api');
-const Markup = require('node-vk-bot-api/lib/markup');
-const api = require('node-vk-bot-api/lib/api');
-const { User, Song } = require('../database/schema');
-const md5 = require('md5');
-const { bot_telegram, sendAudios } = require('./telegram');
-const { searchForAudios } = require('../utils');
+import VkBot from 'node-vk-bot-api';
+import { keyboard, button } from 'node-vk-bot-api/lib/markup';
+import api from 'node-vk-bot-api/lib/api';
+import { User, Song } from '../database/schema';
+import md5 from 'md5';
+import { telegramBot, sendAudios } from './telegram';
+import { searchForAudios } from '../utils';
 
 
-const bot_VK = new VkBot({
+const vkBot = new VkBot({
 	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
+	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
-bot_VK.event('message_new', async ctx => {
-	const id_vk = ctx.message.from_id;
-	const user = await User.find({ id_vk });
+vkBot.event('message_new', async ctx => {
+	const vkId = ctx.message.from_id;
+	const user = await User.find({ vkId });
 	const permission = user[0] ? user[0].permission : false;
 
 	if (!permission) {
@@ -23,7 +23,7 @@ bot_VK.event('message_new', async ctx => {
 		);
 	}
 
-	let audios = ctx.message.attachments.filter(
+	const audios = ctx.message.attachments.filter(
 		(attachment) => attachment.type === 'audio'
 	);
 
@@ -33,36 +33,36 @@ bot_VK.event('message_new', async ctx => {
 		return ctx.reply('Я не получил трек. Выбери музыку и отправь ее мне');
 	}
 
-	let tracks = [];
-	audios.forEach(({ audio }) => {
+	const tracks = audios.map(({ audio }) => {
 		const { url, artist, title } = audio;
-		const song = new Song({ url, artist, title });
-		tracks.push(song);
+		return new Song({ url, artist, title });
 	});
 
 	await User.updateOne(
-		{ id_vk, permission: true },
+		{ vkId, permission: true },
 		{ $set: { songs: tracks } }
 	);
-	const { id_telegram, songs } = await User.findOne(
-		{ id_vk },
-		{ id_telegram: 1, songs: 1 }
+
+	const { telegramId, songs } = await User.findOne(
+		{ vkId },
+		{ telegramId: 1, songs: 1 }
 	);
 
-	if (!id_telegram) {
-		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
+	if (!telegramId) {
+		const hash = md5(vkId + process.env.SALT).substr(0, 10);
+		
 		return ctx.reply(
 			'Ты не авторизовался в телеграме. Перейди к боту',
 			null,
-			Markup.keyboard([
+			keyboard([
 				[
-					Markup.button({
+					button({
 						action: {
 							type: 'open_link',
-							link: `https://t.me/ilushaR_bot?start=${id_vk}-${hash}`,
+							link: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
 							label: 'Telegram Authorization 🔓',
 							payload: JSON.stringify({
-								url: `https://t.me/ilushaR_bot?start=${id_vk}-${hash}`,
+								url: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
 							}),
 						},
 					}),
@@ -71,13 +71,13 @@ bot_VK.event('message_new', async ctx => {
 		);
 	}
 
-	bot_telegram.sendMessage(id_telegram, 'Держи');
+	telegramBot.sendMessage(telegramId, 'Держи');
 	ctx.reply(
 		'Забирай музыку 🎧\n\ntg://resolve?domain=ilushaR_bot',
 		null,
-		Markup.keyboard([
+		keyboard([
 			[
-				Markup.button({
+				button({
 					action: {
 						type: 'open_link',
 						link: 'https://t.me/ilushaR_bot',
@@ -91,54 +91,54 @@ bot_VK.event('message_new', async ctx => {
 		]).oneTime()
 	);
 
-	sendAudios(songs, id_telegram);
+	sendAudios(songs, telegramId);
 });
 
-bot_VK.event('group_join', async (ctx) => {
-	const id_vk = ctx.message.user_id;
-	const user = await User.find({ id_vk });
+vkBot.event('group_join', async (ctx) => {
+	const vkId = ctx.message.user_id;
+	const user = await User.find({ vkId });
 
 	if (!user[0]) {
-		const { first_name: name, last_name: surname } = await api('users.get', {
-			user_ids: id_vk,
+		const { first_name: name, last_name: surname } = (await api('users.get', {
+			user_ids: vkId,
 			access_token: process.env.TOKEN_VK,
-		}).then(res => res.response[0]);
+		})).response[0];
 
-		const new_user = new User({
-			id_vk,
-			id_telegram: null,
+		const newUser = new User({
+			vkId,
+			telegramId: null,
 			name,
 			surname,
 			permission: true,
 			songs: [null, null, null],
 		});
-		const hash = md5(id_vk + process.env.SALT).substr(0, 10);
+		const hash = md5(vkId + process.env.SALT).substr(0, 10);
 
 		ctx.reply('Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи',
 			null,
-			Markup.keyboard([
+			keyboard([
 				[
-					Markup.button({
+					button({
 						action: {
 							type: 'open_link',
-							link: `https://t.me/ilushaR_bot?start=${id_vk}-${hash}`,
+							link: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
 							label: 'Telegram Authorization 🔓',
 							payload: JSON.stringify({
-								url: `https://t.me/ilushaR_bot?start=${id_vk}-${hash}`,
+								url: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
 							}),
 						},
 					}),
 				],
 			]).oneTime()
 		);
-		await new_user.save();
+		await newUser.save();
 	}
-	await User.updateOne({ id_vk }, { $set: { permission: true } });
+	await User.updateOne({ vkId }, { $set: { permission: true } });
 });
 
-bot_VK.event('group_leave', async (ctx) => {
-	const id_vk = ctx.message.user_id;
-	await User.updateOne({ id_vk }, { $set: { permission: false } });
+vkBot.event('group_leave', async (ctx) => {
+	const vkId = ctx.message.user_id;
+	await User.updateOne({ vkId }, { $set: { permission: false } });
 });
 
-module.exports = bot_VK;
+export default vkBot;
