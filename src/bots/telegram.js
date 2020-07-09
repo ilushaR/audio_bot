@@ -52,6 +52,15 @@ telegramBot.onText(/\/start/, async (msg) => {
 	}
 });
 
+telegramBot.onText(/\/vk/, async msg => {
+	const telegramId = msg.chat.id;
+
+	telegramBot.sendMessage(
+		telegramId,
+		'Отправь сюда трек https://vk.com/vk_audio_bot'
+	);
+});
+
 export {
 	telegramBot,
 	sendAudios
