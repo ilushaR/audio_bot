@@ -1,104 +1,105 @@
 import VkBot from 'node-vk-bot-api';
-import { keyboard, button } from 'node-vk-bot-api/lib/markup';
 import api from 'node-vk-bot-api/lib/api';
-import { User, Song } from '../database/schema';
+import User from '../database/models/user';
 import md5 from 'md5';
-import { telegramBot, sendAudios } from './telegram';
-import { searchForAudios } from '../utils';
+import telegramBot from './telegram';
+import { getTracks, getPlaylistInfo, searchForTracks, sendTracks } from '../track';
+import response from '../response/vk';
+import text from '../text';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK,
+	token: process.env.TOKEN_VK_TEST,
 	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
 vkBot.event('message_new', async ctx => {
 	const vkId = ctx.message.from_id;
-	const user = await User.find({ vkId });
-	const permission = user[0] ? user[0].permission : false;
+	const user = await User.findOne({ vkId });
+	const permission = user ? user.permission : false;
 
 	if (!permission) {
-		return ctx.reply(
-			'Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки'
-		);
+		return response.vkNotAuth();
 	}
 
-	const audios = ctx.message.attachments.filter(
-		(attachment) => attachment.type === 'audio'
-	);
-
-	searchForAudios(ctx.message, audios);
-
-	if (!audios[0]) {
-		return ctx.reply('Я не получил трек. Выбери музыку и отправь ее мне');
-	}
-
-	const tracks = audios.map(({ audio }) => {
-		const { url, artist, title } = audio;
-		return new Song({ url, artist, title });
-	});
-
-	await User.updateOne(
-		{ vkId, permission: true },
-		{ $set: { songs: tracks } }
-	);
-
-	const { telegramId, songs } = await User.findOne(
-		{ vkId },
-		{ telegramId: 1, songs: 1 }
-	);
+	const { telegramId } = user;
 
 	if (!telegramId) {
 		const hash = md5(vkId + process.env.SALT).substr(0, 10);
 		
-		return ctx.reply(
-			'Ты не авторизовался в телеграме. Перейди к боту',
-			null,
-			keyboard([
-				[
-					button({
-						action: {
-							type: 'open_link',
-							link: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
-							label: 'Telegram Authorization 🔓',
-							payload: JSON.stringify({
-								url: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
-							}),
-						},
-					}),
-				],
-			]).oneTime()
-		);
+		return response.telegramAuth(ctx, vkId, hash);
 	}
 
-	telegramBot.sendMessage(telegramId, 'Держи');
-	ctx.reply(
-		'Забирай музыку 🎧\n\ntg://resolve?domain=ilushaR_bot',
-		null,
-		keyboard([
-			[
-				button({
-					action: {
-						type: 'open_link',
-						link: 'https://t.me/ilushaR_bot',
-						label: 'Telegram ✈️',
-						payload: JSON.stringify({
-							url: 'https://t.me/ilushaR_bot',
-						}),
-					},
-				}),
-			],
-		]).oneTime()
+	if (ctx.message.text === text.buttons.select) {
+		return response.selectTracks(ctx, { name: user.name, telegramId });
+	}
+
+	if (!ctx.message.attachments[0]) {
+		return response.help(ctx);
+	}
+
+	if (ctx.message.attachments[0].type === 'link') {
+		console.log(ctx.message.attachments[0]);
+		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
+
+		const tracks = await getTracks(ownerId, playlistId, accessKey);
+		
+		sendTracks(tracks, telegramId);
+
+		return response.receiveTrack(ctx, user.name);
+	}
+
+	let tracks = ctx.message.attachments.filter(
+		(attachment) => attachment.type === 'audio'
 	);
 
-	sendAudios(songs, telegramId);
+	searchForTracks(ctx.message, tracks);
+
+	tracks = tracks.map(({ audio }) => {
+		const { url, artist, title } = audio;
+		return { url, artist, title };
+	});
+
+	telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
+	sendTracks(tracks, telegramId);
+
+
+	response.receiveTrack(ctx, user.name);
+});
+
+
+vkBot.event('message_event', async ctx => {
+	console.log(ctx);
+	const { name, telegramId } = ctx.message.payload;
+	const vkId = ctx.message.user_id;
+
+	const tracks = await getTracks(vkId);
+
+	// const tracksPerRequest = 25;
+	// const count = Math.ceil(tracks.length / tracksPerRequest);
+
+	// for (let i = 0; i < count; i++) {
+	// 	const start = tracksPerRequest * i;
+	// 	const end = start + tracksPerRequest;
+
+	// 	const songChunk = tracks.slice(start, end);
+
+	// 	setTimeout(() => {
+	// 		sendTracks(songChunk, telegramId);
+	// 	}, 10000 * i);
+	// }
+
+	sendTracks(tracks, telegramId);
+
+
+	response.receiveTrack(ctx, name);
 });
 
 vkBot.event('group_join', async (ctx) => {
 	const vkId = ctx.message.user_id;
-	const user = await User.find({ vkId });
+	const user = await User.findOne({ vkId });
 
-	if (!user[0]) {
+	if (!user) {
 		const { first_name: name, last_name: surname } = (await api('users.get', {
 			user_ids: vkId,
 			access_token: process.env.TOKEN_VK,
@@ -110,27 +111,11 @@ vkBot.event('group_join', async (ctx) => {
 			name,
 			surname,
 			permission: true,
-			songs: [null, null, null],
 		});
 		const hash = md5(vkId + process.env.SALT).substr(0, 10);
 
-		ctx.reply('Привет, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи',
-			null,
-			keyboard([
-				[
-					button({
-						action: {
-							type: 'open_link',
-							link: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
-							label: 'Telegram Authorization 🔓',
-							payload: JSON.stringify({
-								url: `https://t.me/ilushaR_bot?start=${vkId}-${hash}`,
-							}),
-						},
-					}),
-				],
-			]).oneTime()
-		);
+		response.groupJoin(vkId, hash);
+
 		await newUser.save();
 	}
 	await User.updateOne({ vkId }, { $set: { permission: true } });
