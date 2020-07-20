@@ -31,7 +31,9 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.text === text.buttons.select) {
-		return response.selectTracks(ctx, { name: user.name, telegramId });
+		const tracks = await getTracks({ ownerId: vkId });
+		
+		return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
 	}
 
 	if (!ctx.message.attachments[0]) {
@@ -42,7 +44,7 @@ vkBot.event('message_new', async ctx => {
 		console.log(ctx.message.attachments[0]);
 		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
 
-		const tracks = await getTracks(ownerId, playlistId, accessKey);
+		const tracks = await getTracks({ ownerId, playlistId, accessKey });
 		
 		sendTracks(tracks, telegramId);
 
@@ -73,7 +75,7 @@ vkBot.event('message_event', async ctx => {
 	const { name, telegramId } = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 
-	const tracks = await getTracks(vkId);
+	const tracks = await getTracks({ ownerId: vkId });
 	
 	sendTracks(tracks, telegramId);
 

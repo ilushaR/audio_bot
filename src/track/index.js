@@ -5,7 +5,7 @@ import { finished } from 'stream';
 import { promisify } from 'util';
 
 
-export async function getTracks(userId, playlistId='', accessKey='', count='') {
+export async function getTracks(params) {
 	function convertFormat(url) {
 		if (/\.m3u8\?/.test(url)) {
 			url = url.replace('/index.m3u8', '.mp3').split('/');
@@ -17,7 +17,7 @@ export async function getTracks(userId, playlistId='', accessKey='', count='') {
 		return url;
 	}
 	
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&owner_id=${userId}&count=${count}&album_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
 
 	const tracks = (await rp(url, {
 		method: 'POST',
