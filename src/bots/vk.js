@@ -74,23 +74,8 @@ vkBot.event('message_event', async ctx => {
 	const vkId = ctx.message.user_id;
 
 	const tracks = await getTracks(vkId);
-
-	// const tracksPerRequest = 25;
-	// const count = Math.ceil(tracks.length / tracksPerRequest);
-
-	// for (let i = 0; i < count; i++) {
-	// 	const start = tracksPerRequest * i;
-	// 	const end = start + tracksPerRequest;
-
-	// 	const songChunk = tracks.slice(start, end);
-
-	// 	setTimeout(() => {
-	// 		sendTracks(songChunk, telegramId);
-	// 	}, 10000 * i);
-	// }
-
+	
 	sendTracks(tracks, telegramId);
-
 
 	response.receiveTrack(ctx, name);
 });
