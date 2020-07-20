@@ -9,8 +9,8 @@ import text from '../text';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
+	token: process.env.TOKEN_VK_TEST,
+	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
 vkBot.event('message_new', async ctx => {
@@ -41,7 +41,6 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.attachments[0].type === 'link') {
-		console.log(ctx.message.attachments[0]);
 		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
 
 		const tracks = await getTracks({ ownerId, playlistId, accessKey });
@@ -71,7 +70,6 @@ vkBot.event('message_new', async ctx => {
 
 
 vkBot.event('message_event', async ctx => {
-	console.log(ctx);
 	const { name, telegramId } = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 

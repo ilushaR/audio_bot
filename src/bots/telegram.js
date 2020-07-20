@@ -3,7 +3,7 @@ import User from '../database/models/user';
 import md5 from 'md5';
 import text from '../text';
 
-const telegramBot = new TelegramBot(process.env.TOKEN_TELEGRAM, {
+const telegramBot = new TelegramBot(process.env.TOKEN_TELEGRAM_TEST, {
 	polling: true,
 });
 
