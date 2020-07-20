@@ -1,28 +1,9 @@
 import TelegramBot from 'node-telegram-bot-api';
-import { User } from '../database/schema';
+import User from '../database/models/user';
 import md5 from 'md5';
-import { createWriteStream } from 'fs';
-import { finished } from 'stream';
-import { promisify } from 'util';
-import rp from 'request-promise';
-import { asyncForEach } from '../utils';
+import text from '../text';
 
-function sendAudios(songs, telegramId) {
-	const finishedStream = promisify(finished);
-
-	asyncForEach(songs, async ({ url, artist, title }, index) => {
-		const file = createWriteStream(`audio${index}.mp3`);
-		const stream = rp(url).pipe(file);
-		await finishedStream(stream);
-        
-		telegramBot.sendAudio(telegramId, file.path, {
-			performer: artist,
-			title,
-		});
-	});
-}
-
-const telegramBot = new TelegramBot(process.env.TOKEN_TELEGRAM, {
+const telegramBot = new TelegramBot(process.env.TOKEN_TELEGRAM_TEST, {
 	polling: true,
 });
 
@@ -33,23 +14,18 @@ telegramBot.onText(/\/start/, async (msg) => {
 	const user = await User.find({ telegramId });
 
 	if (user[0]) {
-		return telegramBot.sendMessage(telegramId, 'Ты уже добавлен');
+		return telegramBot.sendMessage(telegramId, text.messages.haveAccess);
 	}
 
 	if (md5(vkId + process.env.SALT).substr(0, 10) !== hash) {
-		return telegramBot.sendMessage(telegramId, 'Нет доступа');
+		return telegramBot.sendMessage(telegramId, text.messages.notAccess);
 	}
 
 	await User.updateOne({ vkId }, { $set: { telegramId } });
 	telegramBot.sendMessage(
 		telegramId,
-		'Ты добавлен, теперь можешь получать музыку'
+		text.messages.telegramJoin
 	);
-	const { songs } = await User.findOne({ vkId }, { songs: 1 });
-
-	if (songs[0]) {
-		sendAudios(songs, telegramId);
-	}
 });
 
 telegramBot.onText(/\/vk/, async msg => {
@@ -57,11 +33,15 @@ telegramBot.onText(/\/vk/, async msg => {
 
 	telegramBot.sendMessage(
 		telegramId,
-		'Отправь сюда трек https://vk.com/vk_audio_bot'
+		text.messages.sendTracks,
+		{
+			reply_markup: JSON.stringify({
+				inline_keyboard: [
+					[{ text: text.buttons.vk, url: text.links.vkMessage }],
+				]
+			}),
+		}
 	);
 });
 
-export {
-	telegramBot,
-	sendAudios
-};
+export default telegramBot;
