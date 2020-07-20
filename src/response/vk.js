@@ -34,7 +34,8 @@ const response = {
 			null,
 			keyboard([
 				[
-					button(text.buttons.select, 'primary')],
+					button(text.buttons.select, 'primary')
+				],
 				[
 					button({
 						action: {
@@ -73,18 +74,25 @@ const response = {
 		);
 	}, 
 	selectTracks: function(ctx, payload) {
+		let buttons = [];
+		for (let i = 0; i < 5; i++) {
+			const label = `${payload.tracks[i].artist} - ${payload.tracks[i].title}`;
+			const formatLabel = label.length > 40 ? label.slice(0, 37) + '...' : label;
+			buttons[i] = button(formatLabel);
+		}
+        
+		buttons.push(button({
+			action: {
+				type: 'callback',
+				label: text.buttons.downloadAll,
+				payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
+			},
+		}));
+
 		ctx.reply(
-			'Свои аудиозаписи',
+			'Твои Аудиозаписи',
 			null,
-			keyboard([
-				button({
-					action: {
-						type: 'callback',
-						label: text.buttons.downloadAll,
-						payload: JSON.stringify(payload),
-					},
-				})
-			]).inline(),
+			keyboard(buttons).inline(),
 		);
 	},
 };
