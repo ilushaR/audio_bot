@@ -9,8 +9,8 @@ import text from '../text';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
+	token: process.env.TOKEN_VK_TEST,
+	confirmation: process.env.CONFIRMATION_VK_TEST,
 });
 
 vkBot.event('message_new', async ctx => {

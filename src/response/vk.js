@@ -78,16 +78,18 @@ const response = {
 		for (let i = 0; i < 5; i++) {
 			const label = `${payload.tracks[i].artist} - ${payload.tracks[i].title}`;
 			const formatLabel = label.length > 40 ? label.slice(0, 37) + '...' : label;
-			buttons[i] = button(formatLabel);
+			buttons[i] = [button(formatLabel)];
 		}
         
-		buttons.push(button({
-			action: {
-				type: 'callback',
-				label: text.buttons.downloadAll,
-				payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
-			},
-		}));
+		buttons.push([
+			button({
+				action: {
+					type: 'callback',
+					label: text.buttons.downloadAll,
+					payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
+				},
+			})
+		]);
 
 		ctx.reply(
 			'Твои Аудиозаписи',
