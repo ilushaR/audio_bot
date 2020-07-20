@@ -28,4 +28,20 @@ telegramBot.onText(/\/start/, async (msg) => {
 	);
 });
 
+telegramBot.onText(/\/vk/, async msg => {
+	const telegramId = msg.chat.id;
+
+	telegramBot.sendMessage(
+		telegramId,
+		text.messages.sendTracks,
+		{
+			reply_markup: JSON.stringify({
+				inline_keyboard: [
+					[{ text: text.buttons.vk, url: text.links.vkMessage }],
+				]
+			}),
+		}
+	);
+});
+
 export default telegramBot;
