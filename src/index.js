@@ -11,4 +11,4 @@ app.use(json());
 
 app.post('/', vkBot.webhookCallback);
 
-app.listen(process.env.PORT || 5000, () => console.log('Server is working'));
+app.listen(process.env.PORT || 8080, () => console.log('Server is working'));
