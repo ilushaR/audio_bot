@@ -5,7 +5,7 @@ mongoose.connect(
 	{ useUnifiedTopology: true, useNewUrlParser: true },
 	err => {
 		if (err) throw err;
-		console.log('Successfully connected');
+		console.log('Successfully connected to database');
 	}
 );
 

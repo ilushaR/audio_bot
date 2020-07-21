@@ -3,7 +3,7 @@ import api from 'node-vk-bot-api/lib/api';
 import User from '../database/models/user';
 import md5 from 'md5';
 import telegramBot from './telegram';
-import { getTracks, getPlaylistInfo, searchForTracks, sendTracks } from '../track';
+import { getTracks, getPlaylistInfo, searchForTracks, sendTracks, sendPlaylistInfo } from '../track';
 import response from '../response/vk';
 import text from '../text';
 
@@ -41,8 +41,9 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.attachments[0].type === 'link') {
-		console.log(ctx.message.attachments[0]);
-		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
+		const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
+
+		sendPlaylistInfo({ title, photoUrl }, telegramId);
 
 		const tracks = await getTracks({ ownerId, playlistId, accessKey });
 		
@@ -65,13 +66,11 @@ vkBot.event('message_new', async ctx => {
 	telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
 	sendTracks(tracks, telegramId);
 
-
 	response.receiveTrack(ctx, user.name);
 });
 
 
 vkBot.event('message_event', async ctx => {
-	console.log(ctx);
 	const { name, telegramId } = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 

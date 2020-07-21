@@ -50,13 +50,33 @@ export function searchForTracks(obj, tracks) {
 	}
 }
 
-export function getPlaylistInfo(link) {
+export async function getPlaylistInfo(link) {
 	const queryParams = new URL(link).searchParams;
 	const playlist = queryParams.get('act');
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
-	
-	return { ownerId, playlistId, accessKey };
+	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.TOKEN_AUDIO}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+
+	const response = (await rp(url, {
+		method: 'POST',
+		headers: {
+			'User-Agent': `${process.env.USER_AGENT}`,
+		},
+		json: true,
+	})).response;
+
+	const name = response.title;
+	const photoUrl = response.photo.photo_1200;
+
+	if (!accessKey) {
+		return { ownerId, playlistId, title: name, photoUrl };
+	}
+
+	const mainArtists = response.main_artists.map(artist => artist.name).join(', ');
+	const featuredArtists = response.featured_artists ? response.featured_artists.map(artist => artist.name).join(', ') : '';
+	const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
+
+	return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
 }
 
 export async function sendTracks(tracks, telegramId) {
@@ -65,7 +85,8 @@ export async function sendTracks(tracks, telegramId) {
 	}
 }
 
-async function sendTrack({ url, artist, title }, telegramId){
+async function sendTrack(track, telegramId) {
+	const { url, artist, title } = track;
 	const finishedStream = promisify(finished);
 	const file = createWriteStream(`${artist} - ${title} - ${telegramId}`.replace(/[/\0]/g, ''));
 	const stream = rp(url).pipe(file);
@@ -80,4 +101,8 @@ async function sendTrack({ url, artist, title }, telegramId){
 	unlink(file.path, err => {
 		if (err) throw err;
 	}); 
+}
+
+export function sendPlaylistInfo(playlist, telegramId) {
+	telegramBot.sendPhoto(telegramId, playlist.photoUrl, { caption: playlist.title });
 }
