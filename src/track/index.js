@@ -1,8 +1,9 @@
 import telegramBot from '../bots/telegram';
 import rp from 'request-promise';
-import { unlink } from 'fs';
+import { createWriteStream, unlink } from 'fs';
+import { finished } from 'stream';
+import { promisify } from 'util';
 // import WorkersData from '../workers';
-import fs from 'fs';
 
 export async function getTracks(params) {
 	function convertFormat(url) {
@@ -100,12 +101,18 @@ export async function sendTracks(tracks, telegramId) {
 	// }
 
 	for (const track of tracks) {
-		sendTrack(track, telegramId);
+		await sendTrack(track, telegramId);
 	}
 }
 
-export function sendTrack({ artist, title }, telegramId){
-	const filepath = 'audio/' + `${artist} - ${title} - ${telegramId}.mp3`.replace(/[/\0]/g, '');
+export async function sendTrack(track, telegramId){
+	const { url, artist, title } = track;
+	const finishedStream = promisify(finished);
+	const file = createWriteStream('audio/' + `${artist} - ${title} - ${telegramId}`.replace(/[/\0]/g, ''));
+	const stream = rp(url).pipe(file);
+
+	await finishedStream(stream);
+	// const filepath = 'audio/' + `${artist} - ${title} - ${telegramId}.mp3`.replace(/[/\0]/g, '');
 	// fs.access(filepath, fs.constants.F_OK, (err) => {
 	// 	console.log(`${filepath} ${err ? 'does not exist' : 'exists'}`);
 	// 	if (!err) {
@@ -117,12 +124,12 @@ export function sendTrack({ artist, title }, telegramId){
 	// 	}
 	// });
 
-	telegramBot.sendAudio(telegramId, filepath, {
+	telegramBot.sendAudio(telegramId, file.path, {
 		performer: artist,
 		title,
 	});
 
-	unlink(filepath, err => {
+	unlink(file.path, err => {
 		if (err) console.log(err);
 	}); 
 }
