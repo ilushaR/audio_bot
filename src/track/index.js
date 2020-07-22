@@ -58,6 +58,7 @@ export async function getPlaylistInfo(link) {
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
 	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+	console.log(url);
 
 	const response = (await rp(url, {
 		method: 'POST',
