@@ -6,8 +6,8 @@ class WorkersData {
 
 	constructor() {
 		this.workers = [];
-		// const numberOfThreads = os.cpus().length;
-		const numberOfThreads = 1;
+		const numberOfThreads = os.cpus().length;
+		// const numberOfThreads = 1;
 		this.completed = 0;
 		this.tracks = [];
 		this.promises = [];
