@@ -19,7 +19,7 @@ export async function getTracks(params) {
 	
 	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
 
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&${paramsQuery}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&${paramsQuery}&v=5.103`;
 
 	// const tracks = (await rp(url, {
 	// 	method: 'POST',
