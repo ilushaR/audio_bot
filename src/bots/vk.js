@@ -17,6 +17,7 @@ vkBot.event('message_new', async ctx => {
 	const vkId = ctx.message.from_id;
 	const user = await User.findOne({ vkId });
 	const permission = user ? user.permission : false;
+	console.log(ctx.message);
 
 	if (!permission) {
 		return response.vkNotAuth();
