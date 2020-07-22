@@ -28,14 +28,15 @@ export async function getTracks(params) {
 	// 	},
 	// 	json: true,
 	// })).response.items;
+	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
-	const response = await rp(url, {
+	const response = (await proxiedRequest(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
 		},
 		json: true,
-	});
+	}));
 
 	console.log(response);
 
@@ -84,21 +85,19 @@ export async function getPlaylistInfo(link) {
 	})).response;
 
 	console.log(response);
-
-	return { ownerId, playlistId, accessKey };
 	
-	// const name = response.title;
-	// const photoUrl = response.photo.photo_1200;
+	const name = response.title;
+	const photoUrl = response.photo.photo_1200;
 
-	// if (!accessKey) {
-	// 	return { ownerId, playlistId, title: name, photoUrl };
-	// }
+	if (!accessKey) {
+		return { ownerId, playlistId, title: name, photoUrl };
+	}
 
-	// const mainArtists = response.main_artists.map(artist => artist.name).join(', ');
-	// const featuredArtists = response.featured_artists ? response.featured_artists.map(artist => artist.name).join(', ') : '';
-	// const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
+	const mainArtists = response.main_artists.map(artist => artist.name).join(', ');
+	const featuredArtists = response.featured_artists ? response.featured_artists.map(artist => artist.name).join(', ') : '';
+	const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
 
-	// return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
+	return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
 }
 
 export async function sendTracks(tracks, telegramId) {
