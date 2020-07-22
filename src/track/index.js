@@ -21,13 +21,23 @@ export async function getTracks(params) {
 
 	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&${paramsQuery}&v=5.103`;
 
-	const tracks = (await rp(url, {
+	// const tracks = (await rp(url, {
+	// 	method: 'POST',
+	// 	headers: {
+	// 		'User-Agent': `${process.env.USER_AGENT}`,
+	// 	},
+	// 	json: true,
+	// })).response.items;
+
+	const response = await rp(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
 		},
 		json: true,
-	})).response.items;
+	});
+
+	const tracks = response.response.items;
 
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }
@@ -69,7 +79,7 @@ export async function getPlaylistInfo(link) {
 	})).response;
 
 	console.log(response);
-	
+
 	const name = response.title;
 	const photoUrl = response.photo.photo_1200;
 
