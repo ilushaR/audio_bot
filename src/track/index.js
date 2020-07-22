@@ -69,6 +69,7 @@ export async function getPlaylistInfo(link) {
 	})).response;
 
 	console.log(response);
+	
 	const name = response.title;
 	const photoUrl = response.photo.photo_1200;
 
