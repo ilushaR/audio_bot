@@ -41,6 +41,8 @@ export async function getTracks(params) {
 
 	const tracks = response.response.items;
 
+	console.log(tracks);
+
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }
 
@@ -82,18 +84,20 @@ export async function getPlaylistInfo(link) {
 
 	console.log(response);
 
-	const name = response.title;
-	const photoUrl = response.photo.photo_1200;
+	return { ownerId, playlistId, accessKey };
+	
+	// const name = response.title;
+	// const photoUrl = response.photo.photo_1200;
 
-	if (!accessKey) {
-		return { ownerId, playlistId, title: name, photoUrl };
-	}
+	// if (!accessKey) {
+	// 	return { ownerId, playlistId, title: name, photoUrl };
+	// }
 
-	const mainArtists = response.main_artists.map(artist => artist.name).join(', ');
-	const featuredArtists = response.featured_artists ? response.featured_artists.map(artist => artist.name).join(', ') : '';
-	const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
+	// const mainArtists = response.main_artists.map(artist => artist.name).join(', ');
+	// const featuredArtists = response.featured_artists ? response.featured_artists.map(artist => artist.name).join(', ') : '';
+	// const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
 
-	return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
+	// return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
 }
 
 export async function sendTracks(tracks, telegramId) {
