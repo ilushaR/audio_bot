@@ -81,7 +81,7 @@ const response = {
 					action: {
 						type: 'callback',
 						label: text.buttons.downloadAll,
-						payload: JSON.stringify(payload),
+						payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
 					},
 				})
 			]).inline(),
