@@ -3,14 +3,14 @@ import api from 'node-vk-bot-api/lib/api';
 import User from '../database/models/user';
 import md5 from 'md5';
 import telegramBot from './telegram';
-import { getTracks, getPlaylistInfo, searchForTracks, sendTracks } from '../track';
+import { getTracks, getPlaylistInfo, searchForTracks, sendTracks, sendPlaylistInfo } from '../track';
 import response from '../response/vk';
 import text from '../text';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK_TEST,
-	confirmation: process.env.CONFIRMATION_VK_TEST,
+	token: process.env.VK_TOKEN,
+	confirmation: process.env.VK_CONFIRMATION,
 });
 
 vkBot.event('message_new', async ctx => {
@@ -30,6 +30,14 @@ vkBot.event('message_new', async ctx => {
 		return response.telegramAuth(ctx, vkId, hash);
 	}
 
+	if (ctx.message.text === text.buttons.downloadAll) {
+		const tracks = await getTracks({ ownerId: vkId });
+	
+		sendTracks(tracks, telegramId);
+
+		return response.receiveTrack(ctx, user.name);
+	}
+
 	if (ctx.message.text === text.buttons.select) {
 		const tracks = await getTracks({ ownerId: vkId });
 		
@@ -41,8 +49,9 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.attachments[0].type === 'link') {
-		console.log(ctx.message.attachments[0]);
-		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
+		const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
+
+		sendPlaylistInfo({ title, photoUrl }, telegramId);
 
 		const tracks = await getTracks({ ownerId, playlistId, accessKey });
 		
@@ -65,13 +74,11 @@ vkBot.event('message_new', async ctx => {
 	telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
 	sendTracks(tracks, telegramId);
 
-
 	response.receiveTrack(ctx, user.name);
 });
 
 
 vkBot.event('message_event', async ctx => {
-	console.log(ctx);
 	const { name, telegramId } = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 
@@ -89,7 +96,7 @@ vkBot.event('group_join', async (ctx) => {
 	if (!user) {
 		const { first_name: name, last_name: surname } = (await api('users.get', {
 			user_ids: vkId,
-			access_token: process.env.TOKEN_VK,
+			access_token: process.env.VK_TOKEN,
 		})).response[0];
 
 		const newUser = new User({

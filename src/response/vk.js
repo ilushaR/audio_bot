@@ -74,22 +74,33 @@ const response = {
 		);
 	}, 
 	selectTracks: function(ctx, payload) {
-		let buttons = [];
+		let elements = [];
+
 		for (let i = 0; i < 5; i++) {
 			const label = `${payload.tracks[i].artist} - ${payload.tracks[i].title}`;
 			const formatLabel = label.length > 40 ? label.slice(0, 37) + '...' : label;
-			buttons[i] = [button(formatLabel)];
+			elements[i] = {
+				[button(formatLabel)]
+			};
 		}
-        
-		buttons.push([
-			button({
-				action: {
-					type: 'callback',
-					label: text.buttons.downloadAll,
-					payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
-				},
-			})
-		]);
+		
+
+		// buttons.push([
+		// 	button({
+		// 		action: {
+		// 			type: 'callback',
+		// 			label: text.buttons.downloadAll,
+		// 			payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
+		// 		},
+		// 	})
+		// ]);
+
+
+		const template = {
+			type: 'carousel',
+			elements,
+		};
+
 
 		ctx.reply(
 			'Твои Аудиозаписи',
