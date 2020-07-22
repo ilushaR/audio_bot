@@ -37,6 +37,8 @@ export async function getTracks(params) {
 		json: true,
 	});
 
+	console.log(response);
+
 	const tracks = response.response.items;
 
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
