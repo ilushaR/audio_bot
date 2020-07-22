@@ -18,8 +18,9 @@ export async function getTracks(params) {
 	}
 	
 	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
+	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
-	const tracks = (await rp(url, {
+	const tracks = (await proxiedRequest(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
@@ -56,8 +57,9 @@ export async function getPlaylistInfo(link) {
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
 	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
-	const response = (await rp(url, {
+	const response = (await proxiedRequest(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
@@ -89,7 +91,7 @@ export async function sendTracks(tracks, telegramId) {
 async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
 	const finishedStream = promisify(finished);
-	const file = createWriteStream(`${artist} - ${title} - ${telegramId}`.replace(/[/\0]/g, ''));
+	const file = createWriteStream('audio/' + `${artist} - ${title} - ${telegramId}`.replace(/[/\0]/g, ''));
 	const stream = rp(url).pipe(file);
 
 	await finishedStream(stream);
