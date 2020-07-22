@@ -30,19 +30,13 @@ export async function getTracks(params) {
 	// })).response.items;
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
-	const response = (await proxiedRequest(url, {
+	const tracks = (await proxiedRequest(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
 		},
 		json: true,
-	}));
-
-	console.log(response);
-
-	const tracks = response.response.items;
-
-	console.log(tracks);
+	})).response.items;
 
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }
@@ -73,7 +67,6 @@ export async function getPlaylistInfo(link) {
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
 	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
-	console.log(url);
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
 	const response = (await proxiedRequest(url, {
@@ -83,8 +76,6 @@ export async function getPlaylistInfo(link) {
 		},
 		json: true,
 	})).response;
-
-	console.log(response);
 	
 	const name = response.title;
 	const photoUrl = response.photo.photo_1200;
