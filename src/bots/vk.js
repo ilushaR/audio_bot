@@ -30,6 +30,14 @@ vkBot.event('message_new', async ctx => {
 		return response.telegramAuth(ctx, vkId, hash);
 	}
 
+	if (ctx.message.text === text.buttons.downloadAll) {
+		const tracks = await getTracks({ ownerId: vkId });
+	
+		sendTracks(tracks, telegramId);
+
+		return response.receiveTrack(ctx, user.name);
+	}
+
 	if (ctx.message.text === text.buttons.select) {
 		const tracks = await getTracks({ ownerId: vkId });
 		
