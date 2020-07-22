@@ -1,16 +1,8 @@
 import telegramBot from '../bots/telegram';
 import rp from 'request-promise';
 import { unlink } from 'fs';
-import WorkersData from '../workers';
+// import WorkersData from '../workers';
 import fs from 'fs';
-
-
-// const telegramBot = require('../bots/telegram');
-// const rp = require('request-promise');
-// const { unlink } = require('fs');
-// const WorkersData = require('../workers');
-
-
 
 export async function getTracks(params) {
 	function convertFormat(url) {
@@ -90,35 +82,44 @@ export async function getPlaylistInfo(link) {
 }
 
 export async function sendTracks(tracks, telegramId) {
-	WorkersData.setTracks(tracks);
+	// WorkersData.setTracks(tracks);
 
-	const workers = WorkersData.getWorkers();
-	const tracksPerThread = Math.ceil(tracks.length / workers.length);
+	// const workers = WorkersData.getWorkers();
+	// const tracksPerThread = Math.ceil(tracks.length / workers.length);
 
-	for (let i = 0; i < workers.length; i++) {
-		const start = i * tracksPerThread;
-		const end = start + tracksPerThread;
+	// for (let i = 0; i < workers.length; i++) {
+	// 	const start = i * tracksPerThread;
+	// 	const end = start + tracksPerThread;
 	
-		const chunkTracks = tracks.slice(start, end) || [];
+	// 	const chunkTracks = tracks.slice(start, end) || [];
 
-		workers[i].postMessage({ tracks: chunkTracks, telegramId });
-		for (const track of chunkTracks) {
-			sendTrack(track, telegramId);
-		}
+	// 	workers[i].postMessage({ tracks: chunkTracks, telegramId });
+	// 	for (const track of chunkTracks) {
+	// 		sendTrack(track, telegramId);
+	// 	}
+	// }
+
+	for (const track of tracks) {
+		sendTrack(track, telegramId);
 	}
 }
 
 export function sendTrack({ artist, title }, telegramId){
 	const filepath = 'audio/' + `${artist} - ${title} - ${telegramId}.mp3`.replace(/[/\0]/g, '');
-	fs.access(filepath, fs.constants.F_OK, (err) => {
-		console.log(`${filepath} ${err ? 'does not exist' : 'exists'}`);
-		if (!err) {
-			console.log(filepath);
-			telegramBot.sendAudio(telegramId, 'audio/Mnogoznaal - Дуга - 659504599.mp3', {
-				performer: artist,
-				title,
-			});
-		}
+	// fs.access(filepath, fs.constants.F_OK, (err) => {
+	// 	console.log(`${filepath} ${err ? 'does not exist' : 'exists'}`);
+	// 	if (!err) {
+	// 		console.log(filepath);
+	// 		telegramBot.sendAudio(telegramId, 'audio/Mnogoznaal - Дуга - 659504599.mp3', {
+	// 			performer: artist,
+	// 			title,
+	// 		});
+	// 	}
+	// });
+
+	telegramBot.sendAudio(telegramId, filepath, {
+		performer: artist,
+		title,
 	});
 
 	unlink(filepath, err => {

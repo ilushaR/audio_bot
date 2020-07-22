@@ -4,7 +4,7 @@ import { json } from 'body-parser';
 import vkBot from './bots/vk';
 import './bots/telegram';
 import './database/index';
-import './workers';
+// import './workers';
 
 
 const app = express();
