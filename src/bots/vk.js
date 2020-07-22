@@ -9,8 +9,8 @@ import text from '../text';
 
 
 const vkBot = new VkBot({
-	token: process.env.TOKEN_VK,
-	confirmation: process.env.CONFIRMATION_VK,
+	token: process.env.VK_TOKEN,
+	confirmation: process.env.VK_CONFIRMATION,
 });
 
 vkBot.event('message_new', async ctx => {
@@ -88,7 +88,7 @@ vkBot.event('group_join', async (ctx) => {
 	if (!user) {
 		const { first_name: name, last_name: surname } = (await api('users.get', {
 			user_ids: vkId,
-			access_token: process.env.TOKEN_VK,
+			access_token: process.env.VK_TOKEN,
 		})).response[0];
 
 		const newUser = new User({
