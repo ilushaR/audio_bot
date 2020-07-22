@@ -17,7 +17,10 @@ export async function getTracks(params) {
 		return url;
 	}
 	
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
+	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
+
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&${paramsQuery}&v=5.103`;
+
 
 	const tracks = (await rp(url, {
 		method: 'POST',
@@ -26,7 +29,7 @@ export async function getTracks(params) {
 		},
 		json: true,
 	})).response.items;
-
+	
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }
 

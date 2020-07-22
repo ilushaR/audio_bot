@@ -31,9 +31,8 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.text === text.buttons.select) {
-		const tracks = await getTracks({ ownerId: vkId });
-		
-		return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
+		const tracks = await getTracks({ owner_id: vkId, count: 5 });
+		return response.selectTracks(ctx, { name: user.name, telegramId, tracks, index: 0 });
 	}
 
 	if (!ctx.message.attachments[0]) {
@@ -44,7 +43,7 @@ vkBot.event('message_new', async ctx => {
 		console.log(ctx.message.attachments[0]);
 		const { ownerId, playlistId, accessKey } = getPlaylistInfo(ctx.message.attachments[0].link.url);
 
-		const tracks = await getTracks({ ownerId, playlistId, accessKey });
+		const tracks = await getTracks({ owner_id: ownerId, playlist_id: playlistId, access_key: accessKey });
 		
 		sendTracks(tracks, telegramId);
 
@@ -71,15 +70,19 @@ vkBot.event('message_new', async ctx => {
 
 
 vkBot.event('message_event', async ctx => {
-	console.log(ctx);
-	const { name, telegramId } = ctx.message.payload;
+	const { name, telegramId, index, changeList, tracks} = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 
-	const tracks = await getTracks({ ownerId: vkId });
-	
-	sendTracks(tracks, telegramId);
+	if (changeList) {
+		const newTracks = await getTracks({owner_id: vkId, count: 5, offset: 5 * index})
+		response.selectTracks(ctx, { tracks: newTracks, index });
+	}
 
-	response.receiveTrack(ctx, name);
+	// const tracks = await getTracks({ owner_id: vkId });
+	
+	// sendTracks(tracks, telegramId);
+
+	// response.receiveTrack(ctx, name);
 });
 
 vkBot.event('group_join', async (ctx) => {
