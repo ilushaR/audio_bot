@@ -4,6 +4,8 @@ import { json } from 'body-parser';
 import vkBot from './bots/vk';
 import './bots/telegram';
 import './database/index';
+import './workers';
+
 
 const app = express();
 
@@ -11,4 +13,4 @@ app.use(json());
 
 app.post('/', vkBot.webhookCallback);
 
-app.listen(process.env.PORT || 5000, () => console.log('Server is working'));
+app.listen(process.env.PORT || 8080, () => console.log('Server is working'));

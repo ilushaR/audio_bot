@@ -1,8 +1,15 @@
 import telegramBot from '../bots/telegram';
 import rp from 'request-promise';
-import { createWriteStream, unlink } from 'fs';
-import { finished } from 'stream';
-import { promisify } from 'util';
+import { unlink } from 'fs';
+import WorkersData from '../workers';
+import fs from 'fs';
+
+
+// const telegramBot = require('../bots/telegram');
+// const rp = require('request-promise');
+// const { unlink } = require('fs');
+// const WorkersData = require('../workers');
+
 
 
 export async function getTracks(params) {
@@ -62,24 +69,38 @@ export function getPlaylistInfo(link) {
 }
 
 export async function sendTracks(tracks, telegramId) {
-	for (const track of tracks) {
-		await sendTrack(track, telegramId);
+	WorkersData.setTracks(tracks);
+
+	const workers = WorkersData.getWorkers();
+	const tracksPerThread = Math.ceil(tracks.length / workers.length);
+
+	for (let i = 0; i < workers.length; i++) {
+		const start = i * tracksPerThread;
+		const end = start + tracksPerThread;
+	
+		const chunkTracks = tracks.slice(start, end) || [];
+
+		workers[i].postMessage({ tracks: chunkTracks, telegramId });
+		for (const track of chunkTracks) {
+			sendTrack(track, telegramId);
+		}
 	}
 }
 
-async function sendTrack({ url, artist, title }, telegramId){
-	const finishedStream = promisify(finished);
-	const file = createWriteStream(`${artist} - ${title} - ${telegramId}`.replace(/[/\0]/g, ''));
-	const stream = rp(url).pipe(file);
-
-	await finishedStream(stream);
-	
-	telegramBot.sendAudio(telegramId, file.path, {
-		performer: artist,
-		title,
+export function sendTrack({ artist, title }, telegramId){
+	const filepath = 'audio/' + `${artist} - ${title} - ${telegramId}.mp3`.replace(/[/\0]/g, '');
+	fs.access(filepath, fs.constants.F_OK, (err) => {
+		console.log(`${filepath} ${err ? 'does not exist' : 'exists'}`);
+		if (!err) {
+			console.log(filepath);
+			telegramBot.sendAudio(telegramId, 'audio/Mnogoznaal - Дуга - 659504599.mp3', {
+				performer: artist,
+				title,
+			});
+		}
 	});
 
-	unlink(file.path, err => {
-		if (err) throw err;
+	unlink(filepath, err => {
+		if (err) console.log(err);
 	}); 
 }
