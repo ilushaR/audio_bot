@@ -17,7 +17,7 @@ export async function getTracks(params) {
 		return url;
 	}
 	
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
 
 	const tracks = (await rp(url, {
 		method: 'POST',
@@ -55,7 +55,7 @@ export async function getPlaylistInfo(link) {
 	const playlist = queryParams.get('act');
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
-	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.TOKEN_AUDIO}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
 
 	const response = (await rp(url, {
 		method: 'POST',
