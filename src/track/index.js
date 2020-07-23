@@ -18,7 +18,7 @@ export async function getTracks(params) {
 	}
 
 	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&${paramsQuery}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&${paramsQuery}&v=5.103`;
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
 	const tracks = (await proxiedRequest(url, {
@@ -29,7 +29,7 @@ export async function getTracks(params) {
 		json: true,
 	})).response.items;
 
-	console.log(tracks.forEach(track => console.log(track.album.thumb)));
+	// console.log(tracks.forEach(track => console.log(track.album.thumb)));
 
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }

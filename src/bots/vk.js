@@ -31,7 +31,7 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.text === text.buttons.downloadAll) {
-		const tracks = await getTracks({ ownerId: vkId });
+		const tracks = await getTracks({ owner_id: vkId });
 	
 		sendTracks(tracks, telegramId);
 
@@ -43,7 +43,7 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.text === text.buttons.select) {
-		const tracks = await getTracks({ ownerId: vkId, count: 10 });
+		const tracks = await getTracks({ owner_id: vkId, count: 10 });
 		
 		return response.showTracks(ctx, { name: user.name, telegramId, tracks, index: 0 });
 	}
