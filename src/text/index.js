@@ -8,7 +8,9 @@ const text = {
 		select: 'Выбрать аудиозапись',
 		telegram: 'Telegram ✈️',
 		telegramAuth: 'Telegram Authorization 🔓',
-		vk: 'Audio Bot 🎶'
+		vk: 'Audio Bot 🎶',
+		prevTracks: '⬅',
+		nextTracks: '➡',
 	},
 	messages: {
 		groupJoin: name => `Привет ${name}, авторизуйся в телеграме, чтобы ты смог получать аудиозаписи`,
@@ -26,7 +28,7 @@ const text = {
 		telegramWeb: 'https://t.me/ilushaR_bot',
 		telegramApp: 'tg://resolve?domain=ilushaR_bot',
 		vk: 'https://vk.com/vk_audio_bot',
-		vkMessage: 'https://vk.com/im?sel=-184374271'
+		vkMessage: 'https://vk.com/im?sel=-184374271',
 	},
 };
 

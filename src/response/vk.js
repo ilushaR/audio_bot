@@ -3,7 +3,6 @@ import { keyboard, button } from 'node-vk-bot-api/lib/markup';
 import text from '../text';
 
 
-
 const response = {
 	vkNotAuth: function(ctx) {
 		ctx.reply(
@@ -80,6 +79,54 @@ const response = {
 			[ button(text.buttons.select) ], 
 			[ button(text.buttons.downloadAll) ]		
 		];
+	// }, 
+	// selectTracks: function(ctx, payload) {
+	// 	let buttons = [];
+	// 	const { tracks, index } = payload;
+	// 	for (let i = 0; i < 5; i++) {
+	// 		const label = `${tracks[i].artist} - ${tracks[i].title}`;
+	// 		const formatLabel = label.length > 40 ? label.slice(0, 37) + '...' : label;
+	// 		buttons.push([button(formatLabel)]);
+	// 	}
+	// 	if (index !== 0) {
+	// 		buttons.push([
+	// 			button({
+	// 			action:{
+	// 				type: 'callback',
+	// 				label: text.buttons.prevTracks,
+	// 				payload: JSON.stringify({name: payload.name, telgramId: payload.telegramId, index: index - 1, changeList: true }),
+	// 			}
+	// 			}), 
+	// 			button({
+	// 				action:{
+	// 					type: 'callback',
+	// 					label: text.buttons.nextTracks,
+	// 					payload: JSON.stringify({name: payload.name, telegramId: payload.telgramId, index: index + 1, changeList: true }),
+	// 				}
+	// 			})
+	// 		])			
+	// 	} else {
+	// 		buttons.push([ 
+	// 			button({
+	// 				action:{
+	// 					type: 'callback',
+	// 					label: text.buttons.nextTracks,
+	// 					payload: JSON.stringify({name: payload.name, telegramId: payload.telgramId, index: index + 1, changeList: true }),
+	// 				}
+	// 			})
+	// 		]);
+	// 	}
+
+
+		// buttons.push([
+		// 	button({
+		// 		action: {
+		// 			type: 'callback',
+		// 			label: text.buttons.downloadAll,
+		// 			payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
+		// 		},
+		// 	})
+		// ]);
 
 		ctx.reply(
 			'Твои аудиозаписи',

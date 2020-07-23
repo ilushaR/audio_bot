@@ -59,7 +59,7 @@ vkBot.event('message_new', async ctx => {
 
 		sendPlaylistInfo({ title, photoUrl }, telegramId);
 
-		const tracks = await getTracks({ ownerId, playlistId, accessKey });
+		const tracks = await getTracks({ owner_id: ownerId, playlist_id: playlistId, access_key: accessKey });
 		
 		sendTracks(tracks, telegramId);
 
@@ -85,14 +85,19 @@ vkBot.event('message_new', async ctx => {
 
 
 vkBot.event('message_event', async ctx => {
-	const { name, telegramId } = ctx.message.payload;
+	const { name, telegramId, index, changeList, tracks} = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 
-	const tracks = await getTracks({ ownerId: vkId });
-	
-	sendTracks(tracks, telegramId);
+	if (changeList) {
+		const newTracks = await getTracks({owner_id: vkId, count: 5, offset: 5 * index});
+		response.selectTracks(ctx, { tracks: newTracks, index });
+	}
 
-	response.receiveTrack(ctx, name);
+	// const tracks = await getTracks({ owner_id: vkId });
+	
+	// sendTracks(tracks, telegramId);
+
+	// response.receiveTrack(ctx, name);
 });
 
 vkBot.event('group_join', async (ctx) => {

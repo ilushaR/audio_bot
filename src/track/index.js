@@ -16,8 +16,9 @@ export async function getTracks(params) {
 
 		return url;
 	}
-	
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
+
+	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.TOKEN_AUDIO}&${paramsQuery}&v=5.103`;
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
 	const tracks = (await proxiedRequest(url, {
