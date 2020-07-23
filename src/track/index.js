@@ -28,6 +28,8 @@ export async function getTracks(params) {
 		json: true,
 	})).response.items;
 
+	console.log(tracks.forEach(track => console.log(track.album.thumb)));
+
 	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
 }
 

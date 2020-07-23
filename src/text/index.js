@@ -1,7 +1,11 @@
 const text = {
 	buttons: {
+		download: 'Скачать',
 		downloadAll: 'Скачать все',
-		select: 'Можешь выбрать из своих аудиозаписей',
+		downloadTracks: 'Скачать свои аудиозаписи',
+		next: '➡️',
+		previous: '⬅️',
+		select: 'Выбрать аудиозапись',
 		telegram: 'Telegram ✈️',
 		telegramAuth: 'Telegram Authorization 🔓',
 		vk: 'Audio Bot 🎶'

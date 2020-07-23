@@ -38,10 +38,14 @@ vkBot.event('message_new', async ctx => {
 		return response.receiveTrack(ctx, user.name);
 	}
 
+	if (ctx.message.text === text.buttons.downloadTracks) {
+		return response.selectTracks(ctx);
+	}
+
 	if (ctx.message.text === text.buttons.select) {
-		const tracks = await getTracks({ ownerId: vkId });
+		const tracks = await getTracks({ ownerId: vkId, count: 10 });
 		
-		return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
+		return response.showTracks(ctx, { name: user.name, telegramId, tracks, index: 0 });
 	}
 
 	if (!ctx.message.attachments[0]) {
@@ -49,6 +53,8 @@ vkBot.event('message_new', async ctx => {
 	}
 
 	if (ctx.message.attachments[0].type === 'link') {
+		console.log(ctx.message.attachments[0].link.photo);
+		console.log(ctx.message.attachments[0].link.photo.sizes);
 		const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
 
 		sendPlaylistInfo({ title, photoUrl }, telegramId);
