@@ -87,6 +87,9 @@ const response = {
 			]).inline(),
 		);
 	},
+	errorHandler: function(ctx) {
+		ctx.reply(text.messages.error);
+	},
 };
 
 export default response;
