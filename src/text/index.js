@@ -19,6 +19,7 @@ const text = {
 		vkReceive: name => `${name}, забирай музыку 🎧`,
 	}, 
 	links: {
+		playlistPhoto: 'https://ekladata.com/6-bNerboUhGPRXm5HP5WbbigaP8@1184x1184.jpg',
 		telegramWeb: 'https://t.me/ilushaR_bot',
 		telegramApp: 'tg://resolve?domain=ilushaR_bot',
 		vk: 'https://vk.com/vk_audio_bot',

@@ -3,6 +3,7 @@ import rp from 'request-promise';
 import { createWriteStream, unlink } from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
+import text from '../text';
 
 
 export async function getTracks(params) {
@@ -69,7 +70,7 @@ export async function getPlaylistInfo(link) {
 
 	console.log(response);
 	const name = response.title;
-	const photoUrl = response.photo.photo_1200;
+	const photoUrl = response.photo ? response.photo.photo_1200 : text.links.playlistPhoto;
 
 	if (!accessKey) {
 		return { ownerId, playlistId, title: name, photoUrl };
