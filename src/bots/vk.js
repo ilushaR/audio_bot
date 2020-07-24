@@ -24,57 +24,68 @@ vkBot.event('message_new', async ctx => {
 
 	const { telegramId } = user;
 
-	if (!telegramId) {
-		const hash = md5(vkId + process.env.SALT).substr(0, 10);
-		
-		return response.telegramAuth(ctx, vkId, hash);
-	}
+	try {
+		if (!telegramId) {
+			const hash = md5(vkId + process.env.SALT).substr(0, 10);
+			
+			return response.telegramAuth(ctx, vkId, hash);
+		}
 
-	if (ctx.message.text === text.buttons.downloadAll) {
-		const tracks = await getTracks({ ownerId: vkId });
+		if (ctx.message.text === text.buttons.downloadAll) {
+			const tracks = await getTracks({ ownerId: vkId });
+		
+			sendTracks(tracks, telegramId);
 	
-		sendTracks(tracks, telegramId);
+			return response.receiveTrack(ctx, user.name);
+		}
 
-		return response.receiveTrack(ctx, user.name);
-	}
+		if (ctx.message.text === text.buttons.select) {
+			const tracks = await getTracks({ ownerId: vkId });
+			
+			return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
+		}
 
-	if (ctx.message.text === text.buttons.select) {
-		const tracks = await getTracks({ ownerId: vkId });
+		if (!ctx.message.attachments[0]) {
+			return response.help(ctx);
+		}
+
+
+		console.log(ctx.message.attachments);
+		if (ctx.message.attachments[0].type === 'link') {
+			const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
+
+			sendPlaylistInfo({ title, photoUrl }, telegramId);
+
+			const tracks = await getTracks({ ownerId, playlistId, accessKey });
 		
-		return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
-	}
+			sendTracks(tracks, telegramId);
 
-	if (!ctx.message.attachments[0]) {
-		return response.help(ctx);
-	}
+			return response.receiveTrack(ctx, user.name);
+		}
+	
+		let tracks = ctx.message.attachments.filter(
+			(attachment) => attachment.type === 'audio'
+		);
+	
+		searchForTracks(ctx.message, tracks);
+	
+		tracks = tracks.map(({ audio }) => {
+			const { url, artist, title } = audio;
+			return { url, artist, title };
+		});
+	
+		if (!tracks[0]) {
+			return response.help(ctx);
+		}
 
-	if (ctx.message.attachments[0].type === 'link') {
-		const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
-
-		sendPlaylistInfo({ title, photoUrl }, telegramId);
-
-		const tracks = await getTracks({ ownerId, playlistId, accessKey });
-		
+		telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
 		sendTracks(tracks, telegramId);
-
-		return response.receiveTrack(ctx, user.name);
+	
+		response.receiveTrack(ctx, user.name);
+	} catch(e) {
+		console.log(e);
+		response.errorHandler(ctx, user.name);
 	}
-
-	let tracks = ctx.message.attachments.filter(
-		(attachment) => attachment.type === 'audio'
-	);
-
-	searchForTracks(ctx.message, tracks);
-
-	tracks = tracks.map(({ audio }) => {
-		const { url, artist, title } = audio;
-		return { url, artist, title };
-	});
-
-	telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
-	sendTracks(tracks, telegramId);
-
-	response.receiveTrack(ctx, user.name);
 });
 
 
