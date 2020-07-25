@@ -1,9 +1,11 @@
 import express from 'express';
 import User from '../database/models/user';
-import { getTracks } from '../track';
+import { getTracks, sendTracks } from '../track';
 import vkBot from '../bots/vk';
 
 const router = express.Router();
+
+router.post('/', vkBot.webhookCallback);
 
 router.get('/getUserById', async (req, res) => {
 	const vkId = req.query.id;
@@ -38,6 +40,11 @@ router.get('/getTracksById', async (req, res) => {
 	return res.json(response);
 });
 
-router.post('/', vkBot.webhookCallback);
+router.post('/sendTracks', (req, res) => {
+	const tracks = req.body;
+	sendTracks(tracks);
+
+	res.json({});
+});
 
 export default router;
