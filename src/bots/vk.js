@@ -32,7 +32,7 @@ vkBot.event('message_new', async ctx => {
 		}
 
 		if (ctx.message.text === text.buttons.downloadAll) {
-			const tracks = await getTracks({ ownerId: vkId });
+			const tracks = await getTracks({ owner_id: vkId });
 		
 			sendTracks(tracks, telegramId);
 	
@@ -40,7 +40,7 @@ vkBot.event('message_new', async ctx => {
 		}
 
 		if (ctx.message.text === text.buttons.select) {
-			const tracks = await getTracks({ ownerId: vkId });
+			const tracks = await getTracks({ owner_id: vkId });
 			
 			return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
 		}
@@ -49,14 +49,12 @@ vkBot.event('message_new', async ctx => {
 			return response.help(ctx);
 		}
 
-
-		console.log(ctx.message.attachments);
 		if (ctx.message.attachments[0].type === 'link') {
 			const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
 
 			sendPlaylistInfo({ title, photoUrl }, telegramId);
 
-			const tracks = await getTracks({ ownerId, playlistId, accessKey });
+			const tracks = await getTracks({ owner_id: ownerId, playlist_id: playlistId, access_key: accessKey });
 		
 			sendTracks(tracks, telegramId);
 
@@ -93,7 +91,7 @@ vkBot.event('message_event', async ctx => {
 	const { name, telegramId } = ctx.message.payload;
 	const vkId = ctx.message.user_id;
 
-	const tracks = await getTracks({ ownerId: vkId });
+	const tracks = await getTracks({ owner_id: vkId });
 	
 	sendTracks(tracks, telegramId);
 

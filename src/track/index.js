@@ -18,8 +18,10 @@ export async function getTracks(params) {
 		return url;
 	}
 	
-	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&owner_id=${params.ownerId}&count=${params.count || ''}&album_id=${params.playlistId || ''}&access_key=${params.accessKey || ''}&v=5.103`;
+	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
+	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&${paramsQuery}&v=5.120`;
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
+	console.log(url);
 
 	const tracks = (await proxiedRequest(url, {
 		method: 'POST',
@@ -29,7 +31,7 @@ export async function getTracks(params) {
 		json: true,
 	})).response.items;
 
-	return tracks.filter(({ url }) => url).map(({ artist, title, url }) => ({ artist, title, url: convertFormat(url) }));
+	return tracks.filter(({ url }) => url).map(({ artist, title, url, album, id }) => ({ artist, title, url: convertFormat(url), album, id }));
 }
 
 export function searchForTracks(obj, tracks) {
@@ -57,7 +59,7 @@ export async function getPlaylistInfo(link) {
 	const playlist = queryParams.get('act');
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
-	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.103`;
+	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.120`;
 	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
 
 	const response = (await proxiedRequest(url, {
