@@ -23,15 +23,17 @@ export async function getTracks(params) {
 	const proxiedRequest = rp.defaults({ proxy: process.env.PROXY });
 	console.log(url);
 
-	const tracks = (await proxiedRequest(url, {
+	const response = (await proxiedRequest(url, {
 		method: 'POST',
 		headers: {
 			'User-Agent': `${process.env.USER_AGENT}`,
 		},
 		json: true,
-	})).response.items;
+	})).response;
+	console.log(response);
 
-	return tracks.filter(({ url }) => url).map(({ artist, title, url, album, id }) => ({ artist, title, url: convertFormat(url), album, id }));
+
+	return response.items.filter(({ url }) => url).map(({ artist, title, url, album, id }) => ({ artist, title, url: convertFormat(url), album, id }));
 }
 
 export function searchForTracks(obj, tracks) {
