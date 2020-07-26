@@ -20,7 +20,7 @@ export async function getTracks(params) {
 	
 	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
 	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&${paramsQuery}&v=5.120`;
-	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
+	const proxiedRequest = rp.defaults({ proxy: process.env.PROXY });
 	console.log(url);
 
 	const tracks = (await proxiedRequest(url, {
@@ -60,7 +60,7 @@ export async function getPlaylistInfo(link) {
 	const accessKey = queryParams.get('access_hash');
 	const [ownerId, playlistId] = playlist.replace('audio_playlist', '').split('_');
 	const url = `https://api.vk.com/method/audio.getPlaylistById?access_token=${process.env.AUDIO_TOKEN}&owner_id=${ownerId}&playlist_id=${playlistId}&access_key=${accessKey}&v=5.120`;
-	const proxiedRequest = rp.defaults({ proxy: 'http://84.201.170.136:8081' });
+	const proxiedRequest = rp.defaults({ proxy: process.env.PROXY });
 
 	const response = (await proxiedRequest(url, {
 		method: 'POST',
