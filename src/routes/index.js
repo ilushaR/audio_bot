@@ -41,8 +41,9 @@ router.get('/getTracksById', async (req, res) => {
 });
 
 router.post('/sendTracks', (req, res) => {
-	const tracks = req.body;
-	sendTracks(tracks);
+	const tracks = JSON.parse(req.body);
+	const telegramId = req.query.id;
+	sendTracks(tracks, telegramId);
 
 	res.json({});
 });
