@@ -12,13 +12,13 @@ router.get('/getUserById', async (req, res) => {
 	const response = {};
 
 	if (!vkId) {
-		return res.json(response);
+		return res.status(400).json(response);
 	}
     
 	const user = await User.findOne({ vkId });
     
 	if (!user) {
-		return res.json(response);
+		return res.status(401).json(response);
 	}
 
 	response.permission = user.permission;
@@ -32,18 +32,22 @@ router.get('/getTracksById', async (req, res) => {
 	const response = {};
 
 	if (!vkId) {
-		return res.json(response);
+		return res.status(400).json(response);
 	}
     
-	response.tracks = await getTracks({ owner_id: vkId });
+	try {
+		response.tracks = await getTracks({ owner_id: vkId });
     
-	return res.json(response);
+		return res.json(response);
+	} catch(e) {
+		return res.status(500).json(response);
+	}
 });
 
 router.post('/sendTracks', (req, res) => {
 	const tracks = req.body;
 	const telegramId = req.query.id;
-	console.log(tracks, telegramId);
+	
 	sendTracks(tracks, telegramId);
 
 	res.json({});
