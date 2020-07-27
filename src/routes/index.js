@@ -1,7 +1,9 @@
 import express from 'express';
-import User from '../database/models/user';
-import { getTracks, sendTracks } from '../track';
 import vkBot from '../bots/vk';
+import User from '../database/models/user';
+import md5 from 'md5';
+import { getTracks, sendTracks } from '../track';
+
 
 const router = express.Router();
 
@@ -47,6 +49,13 @@ router.get('/getTracks', async (req, res) => {
 		console.log(e);
 		return res.status(500).json(response);
 	}
+});
+
+router.get('/getHash', async (req, res) => {
+	const vkId = req.query.id;
+	const hash = md5(vkId + process.env.SALT).substr(0, 10);
+
+	res.json({ hash });
 });
 
 router.post('/sendTracks', (req, res) => {
