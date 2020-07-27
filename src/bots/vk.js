@@ -19,7 +19,7 @@ vkBot.event('message_new', async ctx => {
 	const permission = user ? user.permission : false;
 
 	if (!permission) {
-		return response.vkNotAuth();
+		return response.vkNotAuth(ctx);
 	}
 
 	const { telegramId } = user;
@@ -117,7 +117,7 @@ vkBot.event('group_join', async (ctx) => {
 		});
 		const hash = md5(vkId + process.env.SALT).substr(0, 10);
 
-		response.groupJoin(vkId, hash);
+		response.groupJoin(ctx, vkId, hash);
 
 		await newUser.save();
 	}
