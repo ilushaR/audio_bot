@@ -5,9 +5,13 @@ import vkBot from '../bots/vk';
 
 const router = express.Router();
 
+router.get('/', (req, res) => {
+	res.json({});
+})
+
 router.post('/', vkBot.webhookCallback);
 
-router.get('/getUserById', async (req, res) => {
+router.get('/getUser', async (req, res) => {
 	const vkId = req.query.id;
 	const response = {};
 
@@ -27,7 +31,7 @@ router.get('/getUserById', async (req, res) => {
 	return res.json(response);
 });
 
-router.get('/getTracksById', async (req, res) => {
+router.get('/getTracks', async (req, res) => {
 	const vkId = req.query.id;
 	const response = {};
 

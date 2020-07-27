@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon --exec ./node_modules/.bin/babel-node src/index.js",
-    "babel": "./node_modules/.bin/babel-node src/index.js"
+    "dev": "nodemon --exec babel-node src/index.js",
+    "start": "./node_modules/.bin/pm2 start src/index.js --interpreter ./node_modules/.bin/babel-node",
+    "stop": "./node_modules/.bin/pm2 stop index",
+    "restart": "./node_modules/.bin/pm2 restart index"
   },
   "author": "Ilya Rogulin",
   "license": "MIT",
@@ -15,8 +17,10 @@
     "express": "^4.17.1",
     "md5": "^2.2.1",
     "mongoose": "^5.8.7",
+    "morgan": "^1.10.0",
     "node-telegram-bot-api": "^0.40.0",
     "node-vk-bot-api": "^3.1.1",
+    "pm2": "^4.4.0",
     "request-promise": "^4.2.5"
   },
   "devDependencies": {
