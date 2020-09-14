@@ -33,8 +33,9 @@ const response = {
 			text.messages.vkReceive(username) + '\n' + text.links.telegramApp,
 			null,
 			keyboard([
-				[
-					button(text.buttons.select, 'primary')],
+				// [
+				// 	button(text.buttons.select, 'primary')
+				// ],
 				[
 					button({
 						action: {
@@ -72,21 +73,21 @@ const response = {
 			]).oneTime()
 		);
 	}, 
-	selectTracks: function(ctx, payload) {
-		ctx.reply(
-			'Свои аудиозаписи',
-			null,
-			keyboard([
-				button({
-					action: {
-						type: 'callback',
-						label: text.buttons.downloadAll,
-						payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
-					},
-				})
-			]).inline(),
-		);
-	},
+	// selectTracks: function(ctx, payload) {
+	// 	ctx.reply(
+	// 		'Свои аудиозаписи',
+	// 		null,
+	// 		keyboard([
+	// 			button({
+	// 				action: {
+	// 					type: 'callback',
+	// 					label: text.buttons.downloadAll,
+	// 					payload: JSON.stringify({ name: payload.name, telegramId: payload.telegramId }),
+	// 				},
+	// 			})
+	// 		]).inline(),
+	// 	);
+	// },
 	errorHandler: function(ctx) {
 		ctx.reply(text.messages.error);
 	},

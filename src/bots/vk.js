@@ -31,19 +31,19 @@ vkBot.event('message_new', async ctx => {
 			return response.telegramAuth(ctx, vkId, hash);
 		}
 
-		if (ctx.message.text === text.buttons.downloadAll) {
-			const tracks = await getTracks({ owner_id: vkId });
+		// if (ctx.message.text === text.buttons.downloadAll) {
+		// 	const tracks = await getTracks({ owner_id: vkId });
 		
-			sendTracks(tracks, telegramId);
+		// 	sendTracks(tracks, telegramId);
 	
-			return response.receiveTrack(ctx, user.name);
-		}
+		// 	return response.receiveTrack(ctx, user.name);
+		// }
 
-		if (ctx.message.text === text.buttons.select) {
-			const tracks = await getTracks({ owner_id: vkId });
+		// if (ctx.message.text === text.buttons.select) {
+		// 	const tracks = await getTracks({ owner_id: vkId });
 			
-			return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
-		}
+		// 	return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
+		// }
 
 		if (!ctx.message.attachments[0]) {
 			return response.help(ctx);
