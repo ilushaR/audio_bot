@@ -76,7 +76,6 @@ vkBot.event('message_new', async ctx => {
 			return response.help(ctx);
 		}
 
-		telegramBot.sendMessage(telegramId, text.messages.telegramReceive);
 		sendTracks(tracks, telegramId);
 	
 		response.receiveTrack(ctx, user.name);
