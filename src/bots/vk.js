@@ -45,11 +45,17 @@ vkBot.event('message_new', async ctx => {
 		// 	return response.selectTracks(ctx, { name: user.name, telegramId, tracks });
 		// }
 
-		if (!ctx.message.attachments[0]) {
+		const tracks = ctx.message.attachments.filter(
+			(attachment) => attachment.type === 'audio'
+		);
+    
+		searchForTracks(ctx.message, tracks);
+
+		if (!ctx.message.attachments[0] && tracks.length === 0) {
 			return response.help(ctx);
 		}
 
-		if (ctx.message.attachments[0].type === 'link') {
+		if (ctx.message.attachments[0] && ctx.message.attachments[0].type === 'link') {
 			const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
 
 			sendPlaylistInfo({ title, photoUrl }, telegramId);
@@ -60,23 +66,13 @@ vkBot.event('message_new', async ctx => {
 
 			return response.receiveTrack(ctx, user.name);
 		}
-	
-		let tracks = ctx.message.attachments.filter(
-			(attachment) => attachment.type === 'audio'
-		);
-	
-		searchForTracks(ctx.message, tracks);
-	
-		tracks = tracks.map(({ audio }) => {
+			
+		const audios = tracks.map(({ audio }) => {
 			const { url, artist, title } = audio;
 			return { url, artist, title };
 		});
 	
-		if (!tracks[0]) {
-			return response.help(ctx);
-		}
-
-		sendTracks(tracks, telegramId);
+		sendTracks(audios, telegramId);
 	
 		response.receiveTrack(ctx, user.name);
 	} catch(e) {
