@@ -1,6 +1,9 @@
 import telegramBot from '../bots/telegram';
 import rp from 'request-promise';
-import { createWriteStream, unlink } from 'fs';
+import {
+	createWriteStream,
+	promises
+} from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
 import text from '../text';
@@ -93,20 +96,25 @@ export async function sendTracks(tracks, telegramId) {
 
 async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
-	const finishedStream = promisify(finished);
-	const file = createWriteStream('audio/' + `${artist} - ${title} - ${telegramId}.mp3`.replace(/[/\0]/g, ''));
-	const stream = rp(url).pipe(file);
 
-	await finishedStream(stream);
-	
-	await telegramBot.sendAudio(telegramId, file.path, {
-		performer: artist,
-		title,
-	});
+	try {
+		const finishedStream = promisify(finished);
+		const file = createWriteStream('audio/' + `${artist} - ${title} - ${telegramId} - ${Date.now()}.mp3`.replace(/[/\0]/g, ''));
+		const stream = rp(url).pipe(file);
 
-	unlink(file.path, err => {
-		if (err) throw err;
-	}); 
+		await finishedStream(stream);
+
+		await telegramBot.sendAudio(telegramId, file.path, {
+			performer: artist,
+			title,
+		});
+
+		await promises.unlink(file.path).catch(console.error);
+	} catch (e) {
+		console.error(e);
+
+		await telegramBot.sendMessage(telegramId, text.messages.sendTrackError({ artist, title }));
+	}
 }
 
 export function sendPlaylistInfo(playlist, telegramId) {

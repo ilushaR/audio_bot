@@ -10,7 +10,7 @@ const response = {
 	},
 	telegramAuth: function(ctx, vkId, hash) {
 		ctx.reply(
-			text.messages.telegramNotAuth,
+			text.messages.telegramNotAuth({ vkId, hash }),
 			null,
 			keyboard([
 				[

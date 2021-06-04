@@ -13,11 +13,12 @@ const text = {
 		haveAccess: 'Ты уже добавлен',
 		notAccess: 'Нет доступа',
 		sendTracks: 'Отправляй сюда треки',
+		sendTrackError: ({ artist, title }) => `Ошибка при отправке трека ${artist} - ${title}. Попробуй в следующий раз`,
 		telegramJoin: 'Ты добавлен, теперь можешь получать музыку',
-		telegramNotAuth: 'Ты не авторизовался в телеграме. Перейди к боту',
+		telegramNotAuth: ({ vkId, hash }) => `Ты не авторизовался в телеграме. Перейди к боту tg://resolve?domain=ilushaR_bot&start=${vkId}-${hash}`,
 		vkNotAuth: 'Ты не вступил в группу. Вступи в группу и тогда сможешь получать треки',
 		vkReceive: name => `${name}, забирай музыку 🎧`,
-	}, 
+	},
 	links: {
 		playlistPhoto: 'https://ekladata.com/6-bNerboUhGPRXm5HP5WbbigaP8@1184x1184.jpg',
 		telegramWeb: 'https://t.me/ilushaR_bot',
@@ -28,6 +29,3 @@ const text = {
 };
 
 export default text;
-
-
-
