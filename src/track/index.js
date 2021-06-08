@@ -96,10 +96,11 @@ export async function sendTracks(tracks, telegramId) {
 
 async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
+	const filepath = 'audio/' + `${artist} - ${title} - ${telegramId} - ${Date.now()}.mp3`.replace(/[/\0]/g, '');
 
 	try {
 		const finishedStream = promisify(finished);
-		const file = createWriteStream('audio/' + `${artist} - ${title} - ${telegramId} - ${Date.now()}.mp3`.replace(/[/\0]/g, ''));
+		const file = createWriteStream(filepath);
 		const stream = rp(url).pipe(file);
 
 		await finishedStream(stream);
@@ -108,13 +109,13 @@ async function sendTrack(track, telegramId) {
 			performer: artist,
 			title,
 		});
-
-		await promises.unlink(file.path).catch(console.error);
 	} catch (e) {
 		console.error(e);
 
 		await telegramBot.sendMessage(telegramId, text.messages.sendTrackError({ artist, title }));
 	}
+
+	await promises.unlink(filepath).catch(console.error);
 }
 
 export function sendPlaylistInfo(playlist, telegramId) {
