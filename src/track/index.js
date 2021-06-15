@@ -97,8 +97,8 @@ export async function sendTracks(tracks, telegramId) {
 async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
 
-	const filename = `${artist}-${title}-${telegramId}`.slice(0, 200);
-	const filepath = `audio/${filename}-${Date.now()}.mp3`.replace(/[/\0]/g, '');
+	const filename = `${artist}-${title}-${telegramId}`.slice(0, 200).replace(/[/\0]/g, '');
+	const filepath = `audio/${filename}-${Date.now()}.mp3`;
 
 	try {
 		const finishedStream = promisify(finished);
