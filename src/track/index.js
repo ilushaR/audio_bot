@@ -121,5 +121,5 @@ async function sendTrack(track, telegramId) {
 }
 
 export function sendPlaylistInfo(playlist, telegramId) {
-	telegramBot.sendPhoto(telegramId, playlist.photoUrl, { caption: playlist.title });
+	return telegramBot.sendPhoto(telegramId, playlist.photoUrl, { caption: playlist.title });
 }

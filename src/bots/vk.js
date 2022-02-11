@@ -58,11 +58,11 @@ vkBot.event('message_new', async ctx => {
 		if (ctx.message.attachments[0] && ctx.message.attachments[0].type === 'link') {
 			const { ownerId, playlistId, accessKey, title, photoUrl } = await getPlaylistInfo(ctx.message.attachments[0].link.url);
 
-			sendPlaylistInfo({ title, photoUrl }, telegramId);
+			await sendPlaylistInfo({ title, photoUrl }, telegramId);
 
 			const tracks = await getTracks({ owner_id: ownerId, playlist_id: playlistId, access_key: accessKey });
 		
-			sendTracks(tracks, telegramId);
+			await sendTracks(tracks, telegramId);
 
 			return response.receiveTrack(ctx, user.name);
 		}
@@ -72,7 +72,7 @@ vkBot.event('message_new', async ctx => {
 			return { url, artist, title };
 		});
 	
-		sendTracks(audios, telegramId);
+		await sendTracks(audios, telegramId);
 	
 		response.receiveTrack(ctx, user.name);
 	} catch(e) {
