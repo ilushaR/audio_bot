@@ -96,6 +96,7 @@ export async function sendTracks(tracks, telegramId) {
 
 async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
+	console.log('Track:', track);
 
 	const filename = `${artist}-${title.slice(0, 100)}-${telegramId}`.slice(0, 200).replace(/[/\0]/g, '');
 	const filepath = `audio/${filename}-${Date.now()}.mp3`;
