@@ -6,6 +6,7 @@ import {
 } from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
+import { v4 as uuidv4 } from 'uuid';
 import text from '../text';
 
 
@@ -98,8 +99,7 @@ async function sendTrack(track, telegramId) {
 	const { url, artist, title } = track;
 	console.log('Track:', track);
 
-	const filename = `${artist}-${title.slice(0, 100)}-${telegramId}`.slice(0, 200).replace(/[/\0]/g, '');
-	const filepath = `audio/${filename}-${Date.now()}.mp3`;
+	const filepath = `audio/${uuidv4()}-${Date.now()}.mp3`;
 
 	try {
 		const finishedStream = promisify(finished);
