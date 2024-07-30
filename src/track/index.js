@@ -6,11 +6,9 @@ import {
 } from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
-import { exec } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import text from '../text';
 
-const execPromise = promisify(exec);
 
 export async function getTracks(params) {
 	function convertFormat(url) {
@@ -26,7 +24,6 @@ export async function getTracks(params) {
 	
 	const paramsQuery = Object.entries(params).map(([param, value]) => `${param}=${value}`).join('&');
 	const url = `https://api.vk.com/method/audio.get?access_token=${process.env.AUDIO_TOKEN}&${paramsQuery}&v=5.120`;
-	console.log(url);
 
 	const response = (await rp(url, {
 		method: 'POST',
@@ -35,7 +32,7 @@ export async function getTracks(params) {
 		},
 		json: true,
 	})).response;
-	console.log(response);
+	console.log('audio.get', response);
 
 
 	return response.items.filter(({ url }) => url).map(({ artist, title, url, album, id }) => ({ artist, title, url: convertFormat(url), album, id }));
@@ -76,7 +73,7 @@ export async function getPlaylistInfo(link) {
 		json: true,
 	})).response;
 
-	console.log(response);
+	console.log('audio.getPlaylistById', response);
 	const name = response.title;
 	const photoUrl = response.photo ? response.photo.photo_1200 : text.links.playlistPhoto;
 
@@ -89,6 +86,33 @@ export async function getPlaylistInfo(link) {
 	const artist = featuredArtists ? `${mainArtists} feat. ${featuredArtists}` : mainArtists;
 
 	return { ownerId, playlistId, accessKey, title: `${artist} - ${name}`, photoUrl };
+}
+
+export async function getAudiosInfo(tracks) {
+	const audios = tracks.map(({ audio }) => audio.release_audio_id || `${audio.owner_id}_${audio.id}`);
+
+	const url = `https://api.vk.com/method/audio.getById?access_token=${process.env.AUDIO_TOKEN}&audios=${audios.join(',')}&v=5.120`;
+
+	const response = (await rp(url, {
+		method: 'POST',
+		headers: {
+			'User-Agent': `${process.env.USER_AGENT}`,
+		},
+		json: true,
+	})).response;
+
+	console.log('audio.getById', response);
+
+	if (audios.length !== response.length) {
+		console.error('Audios length mismatch', audios, response);
+		throw new Error('Audios length mismatch');
+	}
+
+	return response.map(a => ({
+		url: a.url,
+		artist: a.artist,
+		title: a.title,
+	}));
 }
 
 export async function sendTracks(tracks, telegramId) {
@@ -104,7 +128,10 @@ async function sendTrack(track, telegramId) {
 	const filepath = `audio/${uuidv4()}-${Date.now()}.mp3`;
 
 	try {
-		await execPromise(`ffmpeg -i "${url}" ${filepath}`);
+		const finishedStream = promisify(finished);
+		const file = createWriteStream(filepath);
+		const stream = rp(url).pipe(file);
+		await finishedStream(stream);
 
 		await telegramBot.sendAudio(telegramId, filepath, {
 			performer: artist,
