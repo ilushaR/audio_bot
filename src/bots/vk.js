@@ -3,7 +3,7 @@ import api from 'node-vk-bot-api/lib/api';
 import User from '../database/models/user';
 import md5 from 'md5';
 import telegramBot from './telegram';
-import { getTracks, getPlaylistInfo, searchForTracks, sendTracks, sendPlaylistInfo } from '../track';
+import { getTracks, getPlaylistInfo, searchForTracks, sendTracks, sendPlaylistInfo, getAudiosInfo } from '../track';
 import response from '../response/vk';
 import text from '../text';
 
@@ -66,11 +66,8 @@ vkBot.event('message_new', async ctx => {
 
 			return response.receiveTrack(ctx, user.name);
 		}
-			
-		const audios = tracks.map(({ audio }) => {
-			const { url, artist, title } = audio;
-			return { url, artist, title };
-		});
+
+		const audios = await getAudiosInfo(tracks);
 	
 		await sendTracks(audios, telegramId);
 	
