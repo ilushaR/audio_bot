@@ -6,9 +6,11 @@ import {
 } from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
+import { exec } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import text from '../text';
 
+const execPromise = promisify(exec);
 
 export async function getTracks(params) {
 	function convertFormat(url) {
@@ -102,13 +104,9 @@ async function sendTrack(track, telegramId) {
 	const filepath = `audio/${uuidv4()}-${Date.now()}.mp3`;
 
 	try {
-		const finishedStream = promisify(finished);
-		const file = createWriteStream(filepath);
-		const stream = rp(url).pipe(file);
+		await execPromise(`ffmpeg -i "${url}" ${filepath}`);
 
-		await finishedStream(stream);
-
-		await telegramBot.sendAudio(telegramId, file.path, {
+		await telegramBot.sendAudio(telegramId, filepath, {
 			performer: artist,
 			title,
 		});
